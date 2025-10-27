@@ -25,3 +25,7 @@ seminars/seminar?/seminar?_utils.py
 
 /.venv/
 homeworks/MNIST/
+
+Vision-Transformer-VIT-for-MNIST/
+
+homeworks/cifar-10*
