@@ -11,219 +11,289 @@
 \end{frame}
 %=======
 \begin{frame}{Recap of Previous Lecture}
-    \myfootnotewithlink{https://dl.heeere.com/conditional-flow-matching/blog/conditional-flow-matching}{image credit: A Visual Dive into Conditional Flow Matching}
-	\begin{figure}
-		\centering
-		\includegraphics[width=0.7\linewidth]{figs/cfm_uncond_to_cond}
-	\end{figure}
-	\vspace{-0.3cm}
-	\begin{block}{Constraints}
-		\vspace{-0.3cm}
-		\[
-			p(\bx) = \cN(0, \bI) = \bbE_{p(\bz)} p_0(\bx | \bz); \quad \pd(\bx) = \bbE_{p(\bz)} p_1(\bx | \bz).
-		\]
-		\vspace{-0.5cm}
-	\end{block}
-	\begin{itemize}
-		\item How should we choose the conditioning latent variable $\bz$?
-		\item How can we define $p_t(\bx | \bz)$ so that it meets the constraints?
-	\end{itemize}
-	\begin{block}{Gaussian Conditional Probability Path}
-		\vspace{-0.3cm}
-		\[
-			p_t(\bx | \bz) = \cN\left(\bmu_t(\bz), \bsigma_t^2(\bz)\right)
-		\]
-		\[
-			\bx_t = \bmu_t(\bz) + \bsigma_t(\bz) \odot \bx_0, \quad {\color{violet} \bx_0 \sim p_0(\bx) = \cN(0, \bI)}
-		\]
-	\end{block}
-\end{frame}
-%=======
-\begin{frame}{Recap of Previous Lecture}
-    \myfootnotewithlink{https://arxiv.org/abs/2210.02747}{Lipman Y., et al. Flow Matching for Generative Modeling, 2022}
-	\begin{block}{Gaussian Conditional Probability Path}
-		\vspace{-0.3cm}
-		\[
-			p_t(\bx | \bz) = \cN\left(\bmu_t(\bz), \bsigma_t^2(\bz)\right); \quad \bx_t = \bmu_t(\bz) + \bsigma_t(\bz) \odot \bx_0
-		\]
-		\vspace{-0.3cm}
-		\[
-			\bff(\bx, \bz, t) =  \bmu_t'(\bz) + \frac{\bsigma_t'(\bz)}{\bsigma_t(\bz)} \odot (\bx - \bmu_t(\bz))
-		\]
-		\vspace{-0.3cm}
-	\end{block}
-	\begin{block}{Conditioning Latent Variable}
-		Let’s choose $\bz = \bx_1$. Then $p(\bz) = p_1(\bx_1)$.
-		\[
-			p_t(\bx) = \int p_t(\bx | \bx_1) p_1(\bx_1) d \bx_1
-		\]
-		\vspace{-0.5cm}
-	\end{block}
-	We must ensure the boundary constraints:
-	\[
-		\begin{cases}
-			p(\bx) = \bbE_{p(\bz)} p_0(\bx | \bz); {\color{gray}(= \cN(0, \bI))} \\
-			\pd(\bx) = \bbE_{p(\bz)} p_1(\bx | \bz).
-		\end{cases}
-		\quad \Rightarrow \quad 
-		\begin{cases}
-			p_0(\bx | \bx_1) = \cN(0, \bI); \\
-			p_1(\bx | \bx_1) = \delta(\bx - \bx_1).
-		\end{cases}
-	\]
-	\vspace{-0.3cm}
-\end{frame}
-%=======
-\begin{frame}{Recap of Previous Lecture}
-    \myfootnotewithlink{https://dl.heeere.com/conditional-flow-matching/blog/conditional-flow-matching}{image credit: A Visual Dive into Conditional Flow Matching}
-	\[
-		p_0(\bx | \bx_1) = \cN(0, \bI); \quad p_1(\bx | \bx_1) = \delta(\bx - \bx_1).
-	\]
-	
-	\begin{block}{Gaussian Conditional Probability Path}
-		\vspace{-0.5cm}
-		\[
-			p_t(\bx | \bx_1) = \cN\left(\bmu_t(\bx_1), \bsigma_t^2(\bx_1)\right); \quad \bx_t = \bmu_t(\bx_1) +  \bsigma_t(\bx_1) \odot \bx_0.
-		\]
-		\vspace{-0.6cm}
-	\end{block}
-	Let’s consider straight conditional paths:	
-	\[
-		\begin{cases}
-			\bmu_t(\bx_1) = t \bx_1; \\
-			\bsigma_t(\bx_1) = 1 - t.
-		\end{cases}
-		\quad \Rightarrow \quad 
-		\begin{cases}
-			p_t(\bx | \bx_1) = \cN\left(t \bx_1, (1-t)^2 \bI\right); \\
-		 	\bx_t = t \bx_1 + (1 - t) \bx_0. 
-	 \end{cases}
-	\]
-	\vspace{-0.3cm}
-	\begin{figure}
-		\centering
-		\includegraphics[width=\linewidth]{figs/conical_paths}
-	\end{figure}
 \end{frame}
 %=======
 \begin{frame}{Outline}
 	\tableofcontents
 \end{frame}
 %=======
-\section{Latent Space Models}
+\section{Discrete Diffusion Models}
 %=======
-\subsection{Score-Based Models}
-%=======
-\begin{frame}{Latent Space Models}
-    \myfootnote{\href{https://arxiv.org/abs/2307.08698}{Dao Q. et al. Flow Matching in Latent Space, 2023} \\ \href{https://neurips2023-ldm-tutorial.github.io/}{NeurIPS 2023 Tutorial: Latent Diffusion Models: Is the Generative AI Revolution Happening in Latent Space?}}
-		\vspace{-0.3cm}
-	\begin{block}{Score-Based Models (Diffusion)}
-		\vspace{-0.3cm}
-		\begin{figure}
-			\includegraphics[width=\linewidth]{figs/latent_diffusion}
-		\end{figure}
-		\vspace{-0.3cm}
+\begin{frame}{Discrete or Continuous Diffusion Models?}
+	\textbf{Reminder:} Diffusion models define a forward corruption process and a reverse denoising process.
+	Previously, we studied diffusion models with continuous states $\bx(t) \in \mathbb{R}^m$.
+	\begin{block}{Continuous state space}
+		\begin{itemize}
+			\item \textbf{Discrete time} $t \in \{0,1,\ldots,T\}$ $\;\Rightarrow\;$ \textbf{DDPM / NCSN}.
+			\item \textbf{Continuous time} $t \in [0,1]$ $\;\Rightarrow\;$ \textbf{Score-based SDE models}.
+		\end{itemize}
 	\end{block}
-    \eqpause
-	\begin{block}{Flow Matching}
-		\vspace{-0.3cm}
-		\begin{figure}
-			\includegraphics[width=\linewidth]{figs/latent_flow_matching}
-		\end{figure}
+	\eqpause
+	Now we turn to diffusion over discrete-value states $\bx(t) \in \{1, \dots, K\}^m$.
+	\begin{block}{Discrete state space}
+		\begin{itemize}
+			\item \textbf{Discrete time} $t \in \{0,1,\ldots,T\}$.
+			\item \textbf{Continuous time} $t \in [0,1]$.
+		\end{itemize}
+	\end{block}
+	Let's discuss why we need discrete diffusion models.
+\end{frame}
+%=======
+\begin{frame}{Why Discrete Diffusion Models?}
+	\myfootnotewithlink{https://aaronlou.com/blog/2024/discrete-diffusion/}{https://aaronlou.com/blog/2024/discrete-diffusion/}
+	While autoregressive (AR) models dominate discrete-data domains (e.g., text or sequences), they have fundamental limitations.
+	\eqpause
+	\begin{block}{Key advantages of discrete diffusion}
+		\begin{itemize}
+			\item \textbf{Parallel generation:} diffusion enables sampling all tokens simultaneously, unlike AR’s strictly left-to-right process. 
+			\eqpause
+			\item \textbf{Flexible infilling:}. diffusion can mask arbitrary parts of a sequence and reconstruct them, rather than generating only from prefix to suffix.
+			\eqpause 
+			\item \textbf{Robustness:} diffusion avoids the "exposure bias" caused by teacher forcing in AR training.
+			\eqpause
+			\item \textbf{Unified framework:} diffusion generalizes naturally to discrete domains that do not suit continuous Gaussian noise.
+		\end{itemize}
 	\end{block}
 \end{frame}
 %=======
-\subsection{Autoregressive Models}
+\subsection{Forward Discrete Process}
 %=======
-\begin{frame}{Vector Quantized VAE (VQ-VAE)}
-    \myfootnote{\href{https://arxiv.org/abs/2004.02088}{Zhao Y. et al. Feature Quantization Improves GAN Training, 2020} \\ \href{https://arxiv.org/abs/1711.00937}{Oord A., Vinyals O., Kavukcuoglu K. Neural Discrete Representation Learning, 2017}}
-
-	Define a dictionary space $\{\be_k\}_{k=1}^K$, where $\be_k \in \bbR^C$ and $K$ is the dictionary’s size.
-	\vspace{-0.5cm}
-	\begin{minipage}[t]{0.45\columnwidth}
+\begin{frame}{Forward Discrete Process}
+	\myfootnotewithlink{https://arxiv.org/abs/2107.03006}{Austin J. et al. Structured denoising diffusion models in discrete state-spaces, 2021.}
+	\begin{block}{Continuous Diffusion Markov Chain}
+		In continuous diffusion, the forward Markov chain is defined by progressively corrupting data with Gaussian noise:
 		\[
-			\bz_q = \bq (\bz) = \be_{k^*}
+			q(\bx_t|\bx_{t-1}) = \mathcal{N}(\sqrt{1-\beta_t}\bx_{t-1}, \beta_t \bI).
 		\]
-        Here $k^* = \argmin_k \| \bz - \be_k \|$.
-	\end{minipage}%
-	\begin{minipage}[t]{0.55\columnwidth}
-		\vspace{-0.5cm}
-		\begin{figure}
-			\includegraphics[width=\linewidth]{figs/fqgan_cnn}
-		\end{figure}
-	\end{minipage}	
-	\vspace{0.5cm}	
-    \eqpause
+	\end{block}
+	\eqpause
+	\vspace{-0.3cm}
+	\begin{block}{Discrete Diffusion Markov Chain}
+		For discrete data, we instead define a Markov chain over categorical states:
+		\[
+			q(\bx_t|\bx_{t-1}) = \Cat(\bQ_t\bx_{t-1}),
+		\]
+		where $\bQ_t \in [0,1]^{K \times K}$ is a \textbf{transition matrix} where each column gives transition probabilities from one state to all others, and columns sum to 1:
+		\vspace{-0.3cm}
+		\[
+			[\bQ_t]_{ij} = q(x_t = i | x_{t-1} = j),
+			\qquad
+			\sum_{i=1}^K [\bQ_t]_{ij} = 1.
+		\]
+	\end{block}
+\end{frame}
+%=======
+\begin{frame}{Forward Process over Time}
+	\begin{itemize}
+		\item The forward diffusion gradually destroys information through repeated random transitions.
+		\eqpause
+		\item Applying the transition $t$ times yields the marginal distribution:
+			\[
+				q(\bx_t|\bx_0) = \Cat(\bQ_{1:t}\bx_0),
+				\qquad
+				\bQ_{1:t} = \bQ_t \bQ_{t-1}\cdots\bQ_1.
+			\]
+		\eqpause
+		\vspace{-0.7cm}
+		\item As $t \to T$, the process drives the data toward a stationary distribution.
+		\eqpause
+		\item We design the transition matrices $\bQ_t$ to achieve this behavior.
+	\end{itemize}
+\end{frame}
+%=======
+\begin{frame}{Transition Matrix}
+	\myfootnotewithlink{https://arxiv.org/abs/2107.03006}{Austin J. et al. Structured denoising diffusion models in discrete state-spaces, 2021.}
+
+	\begin{itemize}
+		\item The choice of $\bQ_t$ determines how information is erased and what the stationary distribution becomes.
+		\eqpause
+		\item $\bQ_t$ and $\bQ_{1:t}$ should be easy to compute for each $t$.
+		\item \textbf{Uniform diffusion}
+		\[
+			\bQ_t = (1 - \beta_t) \bI + \beta_t \bU,
+			\qquad
+			\mathbf{U}_{ij} = \tfrac{1}{K}.
+		\]
+		Each token is replaced by a uniformly random symbol with probability $\beta_t$.
+		The stationary distribution is uniform noise.
+		\eqpause
+		\item \textbf{Absorbing diffusion}
+		\[
+			\bQ_t = (1-\beta_t)\bI + \beta_t\, \mathbf{e}_m \mathbf{1}^\top.
+		\]
+		Tokens are gradually replaced by a special mask $m$;
+		the stationary distribution is fully masked.
+	\end{itemize}
+
+\end{frame}
+%=======
+\begin{frame}{Transition Matrix}
 	\[
-		\cL_{\bphi, \btheta}(\bx)  =  \log \pt(\bx| \bz_q) - \log K
+		q(\bx_t|\bx_0) = \Cat(\bQ_{1:t}\bx_0),
+		\qquad
+		\bQ_{1:t} = \bQ_t \bQ_{t-1} \cdots \bQ_1.
 	\]
-	\vspace{-0.3cm}
-	\begin{figure}
+	\eqpause
+	\begin{block}{Uniform Diffusion}
+		\[
+			\bQ_t = (1-\beta_t)\bI + \beta_t \mathbf{U},
+			\qquad
+			\mathbf{U}_{ij} = \tfrac{1}{K}.
+		\]
+		\[
+			\bQ_{1:t} = \bar\alpha_t\bI + (1 - \bar\alpha_t) \mathbf{U},
+			\quad
+			\bar\alpha_t = \prod_{s=1}^t (1-\beta_s).
+		\]
+		\eqpause
+		\begin{itemize}
+			\item Each token retains its original value with prob.~$\bar\alpha_t$.
+			\item It becomes uniformly random with prob.~$(1 - \bar\alpha_t)$.
+			\item As $t \to T$, the process converges to the stationary uniform distribution.
+		\end{itemize}
+	\end{block}
+\end{frame}
+%=======
+\begin{frame}{Transition Matrix}
+	\myfootnotewithlink{https://arxiv.org/abs/2107.03006}{Austin J. et al., Structured denoising diffusion models in discrete state-spaces, 2021.}
+
+	\begin{block}{Absorbing Diffusion}
+		\[
+			\bQ_t = (1-\beta_t)\bI + \beta_t\, \mathbf{e}_m \mathbf{1}^\top,
+		\]
+		\[
+			\bQ_{1:t} = \bar\alpha_t\,\bI + (1-\bar\alpha_t)\,\mathbf{e}_m \mathbf{1}^\top,
+			\qquad
+			\bar\alpha_t = \prod_{s=1}^t (1-\beta_s).
+		\]
+		\eqpause
+		\begin{itemize}
+			\item Each token retains its original value with prob.~$\bar\alpha_t$.
+			\item It becomes $\mathbf{e}_m$ with prob.~$(1 - \bar\alpha_t)$.
+			\item As $t \to T$, all tokens converge to the mask state: $q(\bx_T) \approx \Cat(\mathbf{e}_m)$.
+			\item This makes the process analogous to \textbf{masked language modeling}.
+		\end{itemize}
+	\end{block}
+\end{frame}
+%=======
+\begin{frame}{Uniform vs. Absorbing Transition Matrix}
+	\myfootnotewithlink{https://arxiv.org/abs/2107.03006}{Austin J. et al., Structured denoising diffusion models in discrete state-spaces, 2021.}
+	\begin{table}[h!]
 		\centering
-		\includegraphics[width=\linewidth]{figs/vqvae}
-	\end{figure}
+		\small
+		\begin{tabular}{lcc}
+			\toprule
+			\textbf{Aspect} & \textbf{Uniform Diffusion} & \textbf{Absorbing Diffusion} \\
+			\midrule
+			$\bQ_t$
+				& $(1-\beta_t)\bI + \beta_t \mathbf{U}$ 
+				& $(1-\beta_t)\bI + \beta_t \mathbf{e}_m\mathbf{1}^\top$ \\[4pt]
+			$\bQ_{1:t}$
+				& $\bar\alpha_t \bI + (1-\bar\alpha_t)\mathbf{U}$
+				& $\bar\alpha_t \bI + (1-\bar\alpha_t)\mathbf{e}_m\mathbf{1}^\top$ \\[4pt]
+			$\bQ_{1:\infty}$
+				& $\mathbf{U}$
+				& $\Cat(\mathbf{e}_m)$ \\[4pt]
+			Interpretation
+				& Random replacement
+				& Gradual masking of tokens \\[4pt]
+			Application
+				& Image / symbol diffusion
+				& Text diffusion $\approx$ Masked LM \\[4pt]
+			\bottomrule
+		\end{tabular}
+	\end{table}
+	\eqpause
+	\begin{block}{Observation}
+		Both schemes gradually destroy information, but differ in their stationary limit.
+		Absorbing diffusion bridges diffusion and masked-language-model objectives.
+	\end{block}
 \end{frame}
 %=======
-\begin{frame}{Vector Quantized GAN}
-    \myfootnotewithlink{https://arxiv.org/abs/2012.09841}{Esser P. et al. Taming Transformers for High-Resolution Image Synthesis, 2020}
+\begin{frame}
+	NOT READY
+\end{frame}
+%=======
+\begin{frame}{Reverse Process and Model Parameterization}
+	\myfootnotewithlink{https://arxiv.org/abs/2107.03006}{Austin J. et al., 2021.}
+
+	\begin{block}{Goal}
+		Learn a reverse model that reconstructs cleaner data from corrupted inputs:
+		\[
+			p_\theta(\bx_{t-1}|\bx_t)
+			\approx q(\bx_{t-1}|\bx_t,\bx_0).
+		\]
+	\end{block}
+	\eqpause
 	\begin{itemize}
-		\item We use a VQ-VAE model and its objective.
-		\item We add an adversarial loss between generated and real images to further improve the visual quality of reconstructions.
+		\item The reverse chain defines the generative process:
+		\[
+			p_\theta(\bx_{0:T}) = p(\bx_T)
+			\prod_{t=1}^{T} p_\theta(\bx_{t-1}|\bx_t).
+		\]
+		\eqpause
+		\item We parameterize $p_\theta(\bx_{t-1}|\bx_t)$ as a factorized categorical distribution:
+		\[
+			p_\theta(x_{t-1,i}|x_t)
+			= \Cat(x_{t-1,i};\,\pi_\theta(x_t,i,t)),
+		\]
+		where $\pi_\theta$ are model logits over $K$ symbols.
 	\end{itemize}
-	\begin{figure}
-		\includegraphics[width=\linewidth]{figs/vqgan}
-	\end{figure}
 \end{frame}
 %=======
-\begin{frame}{LlamaGen: Pure Autoregression}
-    \myfootnotewithlink{https://arxiv.org/abs/2406.06525}{Sun P. et al. Autoregressive Model Beats Diffusion: Llama for Scalable Image Generation, 2024}
+\begin{frame}{Variational Objective (Discrete ELBO)}
+	\myfootnotewithlink{https://arxiv.org/abs/2107.03006}{Austin J. et al., 2021.}
+	\begin{block}{Evidence Lower Bound}
+		\[
+		\log p_\theta(\bx_0)
+		\ge
+		\mathbb{E}_q\!\Big[
+			\sum_{t=1}^T
+			-D_{\mathrm{KL}}\big(
+				q(\bx_{t-1}|\bx_t,\bx_0)
+				\;\|\;
+				p_\theta(\bx_{t-1}|\bx_t)
+			)
+		\Big].
+		\]
+	\end{block}
+	\eqpause
+	For categorical transitions, the KL becomes a cross-entropy term:
+	\[
+		\mathcal{L}_t
+		= \mathbb{E}_{\bx_0,t}
+		[-\log p_\theta(x_{t-1}\!=\!x_0\,|\,\bx_t,t)].
+	\]
+	\eqpause
 	\begin{itemize}
-		\item Use a VQ-GAN encoder for mapping images into the discrete latent space (codebook vectors).
-		\item Train a pure autoregressive model (Llama-based) in the latent space.
-		\item Use the VQ-GAN decoder to map discrete tokens back to image space.
+		\item Equivalent to predicting the clean token $x_0$ from a partially noised $\bx_t$.
+		\item In practice, the model learns to *denoise* corrupted inputs at multiple noise levels.
 	\end{itemize}
-	\vspace{-0.3cm}
-	\begin{figure}
-		\includegraphics[width=0.85\linewidth]{figs/llamagen_samples}
-	\end{figure}
 \end{frame}
 %=======
-\begin{frame}{Visual Autoregressive Modeling (VAR)}
-    \myfootnotewithlink{https://arxiv.org/abs/2404.02905}{Tean K. et al. Visual Autoregressive Modeling: Scalable Image Generation via Next-Scale Prediction, 2024}
-	\begin{figure}
-		\includegraphics[width=0.9\linewidth]{figs/var_idea}
-	\end{figure}
-    \eqpause
-	\begin{figure}
-		\includegraphics[width=0.9\linewidth]{figs/var_training}
-	\end{figure}
-\end{frame}
-%=======
-\section{The Worst Course Overview}
-%=======
-\begin{frame}{The Worst Course Overview :)}
-    \myfootnotewithlink{https://lilianweng.github.io/posts/2021-07-11-diffusion-models/}{Weng L. What are Diffusion Models?, blog post, 2021}
-	\begin{figure}
-		\includegraphics[width=\linewidth]{figs/generative-overview}
-	\end{figure}
-\end{frame}
-%=======
-\begin{frame}{The Worst Course Overview :)}
-    \myfootnote{\href{https://arxiv.org/abs/2112.07804}{Xiao Z., Kreis K., Vahdat A. Tackling the generative learning trilemma with denoising diffusion GANs, 2021} \\ \href{https://udlbook.github.io/udlbook/}{Simon J.D. Prince. Understanding Deep Learning, 2023}}
-	\vspace{-0.3cm}
-	\begin{figure}
-		\includegraphics[width=0.45\linewidth]{figs/trilemma}
-	\end{figure}
-    \eqpause
-	\vspace{-0.5cm}
-	\begin{figure}
-		\includegraphics[width=0.9\linewidth]{figs/gen_comp_table}
-	\end{figure}
+\begin{frame}{Relation to Masked Language Modeling (MLM)}
+	\myfootnotewithlink{https://arxiv.org/abs/2107.03006}{Austin J. et al., 2021.}
+	\begin{itemize}
+		\item In absorbing diffusion, corrupted tokens are replaced by a mask $m$.
+		\item The denoising task becomes identical to predicting masked tokens:
+			\[
+				\mathcal{L}
+				= \mathbb{E}_{t\sim p(t)}
+				\mathbb{E}_{\bx_t\sim q(\bx_t|\bx_0)}
+				[-\log p_\theta(\bx_0|\bx_t,t)].
+			\]
+		\eqpause
+		\item Therefore, discrete diffusion can be seen as a \textbf{mixture of MLM objectives}
+			with varying masking rates.
+		\eqpause
+		\item This view directly connects diffusion LMs to BERT-style training,
+			but provides a principled probabilistic framework.
+	\end{itemize}
 \end{frame}
 %=======
 \begin{frame}{Summary}
 	\begin{itemize}
-		\item Most state-of-the-art generative models are latent variable models with either continuous or discrete latent spaces.
+		\item 
 	\end{itemize}
 \end{frame}
 \end{document}
