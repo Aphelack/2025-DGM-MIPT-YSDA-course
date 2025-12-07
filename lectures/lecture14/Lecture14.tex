@@ -56,6 +56,12 @@
 	\end{block}
 \end{frame}
 %=======
+\begin{frame}{2025 – Big Bang of Discrete Diffusion Models}
+	\myfootnotewithlink{https://arxiv.org/abs/2506.17298}{Khanna S. et al. Mercury: Ultra-fast language models based on diffusion, 2025.}
+	\begin{figure}
+		\includegraphics[width=\linewidth]{figs/mercury}
+	\end{figure}
+\end{frame}
 \subsection{Forward Discrete Process}
 %=======
 \begin{frame}{Forward Discrete Process}
@@ -73,17 +79,24 @@
 		\[
 			q(\bx_t|\bx_{t-1}) = \Cat(\bQ_t\bx_{t-1}),
 		\]
-		where $\bQ_t \in [0,1]^{K \times K}$ is a \textbf{transition matrix} where each column gives transition probabilities from one state to all others, and columns sum to 1:
-		\vspace{-0.3cm}
+		where each $\bx_t \in \{0,1\}^K$ is a \textbf{one-hot vector} encoding the categorical state.
+	\end{block}
+	\eqpause
+	What is the transition matrix $\bQ_t$?
+\end{frame}
+%=======
+\begin{frame}{Forward Process over Time}
+	\begin{block}{Transition Matrix}
+		$\bQ_t \in [0,1]^{K \times K}$ is a \textbf{transition matrix} where each column gives transition probabilities from one state to all others, and columns sum to 1:
+		\vspace{-0.5cm}
 		\[
 			[\bQ_t]_{ij} = q(x_t = i | x_{t-1} = j),
 			\qquad
 			\sum_{i=1}^K [\bQ_t]_{ij} = 1.
 		\]
+		\vspace{-0.5cm}
 	\end{block}
-\end{frame}
-%=======
-\begin{frame}{Forward Process over Time}
+	\eqpause
 	\begin{itemize}
 		\item The forward diffusion gradually destroys information through repeated random transitions.
 		\eqpause
@@ -224,14 +237,12 @@
 			\approx q(\bx_{t-1}|\bx_t,\bx_0).
 		\]
 	\end{block}
-	\eqpause
 	\begin{itemize}
 		\item The reverse chain defines the generative process:
 		\[
 			p_\theta(\bx_{0:T}) = p(\bx_T)
 			\prod_{t=1}^{T} p_\theta(\bx_{t-1}|\bx_t).
 		\]
-		\eqpause
 		\item We parameterize $p_\theta(\bx_{t-1}|\bx_t)$ as a factorized categorical distribution:
 		\[
 			p_\theta(x_{t-1,i}|x_t)
@@ -257,14 +268,12 @@
 		\Big].
 		\]
 	\end{block}
-	\eqpause
 	For categorical transitions, the KL becomes a cross-entropy term:
 	\[
 		\mathcal{L}_t
 		= \mathbb{E}_{\bx_0,t}
 		[-\log p_\theta(x_{t-1}\!=\!x_0\,|\,\bx_t,t)].
 	\]
-	\eqpause
 	\begin{itemize}
 		\item Equivalent to predicting the clean token $x_0$ from a partially noised $\bx_t$.
 		\item In practice, the model learns to *denoise* corrupted inputs at multiple noise levels.
@@ -282,12 +291,68 @@
 				\mathbb{E}_{\bx_t\sim q(\bx_t|\bx_0)}
 				[-\log p_\theta(\bx_0|\bx_t,t)].
 			\]
-		\eqpause
 		\item Therefore, discrete diffusion can be seen as a \textbf{mixture of MLM objectives}
 			with varying masking rates.
-		\eqpause
 		\item This view directly connects diffusion LMs to BERT-style training,
 			but provides a principled probabilistic framework.
+	\end{itemize}
+\end{frame}
+%=======
+%=======
+\begin{frame}{Posterior Distribution $q(x_{t-1} \mid x_t, x_0)$}
+	\myfootnotewithlink{https://arxiv.org/pdf/2107.03006}{Austin J. et al., \textit{Structured denoising diffusion models in discrete state-spaces}, 2021.}
+	\begin{itemize}
+		\item To train the reverse model, we need the posterior distribution
+			\[
+				q(x_{t-1} \mid x_t, x_0).
+			\]
+		\item From Bayes’ rule (Eq.~3 in the paper):
+			\[
+				q(x_{t-1} \mid x_t, x_0)
+				= 
+				\frac{
+					q(x_t \mid x_{t-1}) \, q(x_{t-1} \mid x_0)
+				}{
+					q(x_t \mid x_0)
+				}.
+			\]
+		\item All three terms are tractable:
+			\[
+			\begin{aligned}
+				q(x_t \mid x_{t-1}) &= \Cat(Q_t[x_{t-1},:]),\\
+				q(x_{t-1} \mid x_0) &= \Cat(Q_{1:(t-1)}[x_0,:]),\\
+				q(x_t \mid x_0) &= \Cat(Q_{1:t}[x_0,:]).
+			\end{aligned}
+			\]
+		\item This expression defines a categorical distribution over $x_{t-1}$,
+		      enabling exact computation of the discrete ELBO.
+	\end{itemize}
+\end{frame}
+%=======
+\begin{frame}{Posterior Distribution $q(x_{t-1} \mid x_t, x_0)$}
+	\myfootnotewithlink{https://arxiv.org/pdf/2107.03006}{Austin J. et al., \textit{Structured Denoising Diffusion Models in Discrete State-Spaces}, 2021.}
+
+	\begin{block}{Exact posterior (Eq.~3 in the paper, TRANSPOSE)}
+		\[
+		q(x_{t-1} \mid x_t, x_0)
+		=
+		\Cat\!\left(
+			x_{t-1};
+			\; \bp =
+			\frac{
+				x_t \bQ_t^{\!\top} \odot x_0 \, \bar{\bQ}_{t-1}
+			}{
+				x_0 \, \bar{\bQ}_t \, x_t^{\!\top}
+			}
+		\right).
+		\]
+	\end{block}
+
+	\eqpause
+	\begin{itemize}
+		\item $\bQ_t$ — forward transition at step $t$.
+		\item $\bar{\bQ}_t = \bQ_t \bQ_{t-1}\!\cdots\bQ_1$ — cumulative transition.
+		\item $\odot$ — elementwise (Hadamard) product.
 	\end{itemize}
 \end{frame}
 %=======

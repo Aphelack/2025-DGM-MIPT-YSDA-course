@@ -69,7 +69,7 @@
             \item Train a denoised score function $\bs_{\btheta, \sigma_t}(\bx_t)$ for each noise level:
             \vspace{-0.3cm}
             \[
-                \sum_{t=1}^\top {\color{violet}\sigma_t^2} \cdot \bbE_{\pd(\bx)} \bbE_{q(\bx_t | \bx)}\bigl\| \bs_{\btheta, \sigma_t}(\bx_t) - \nabla_{\bx_t} \log q(\bx_t | \bx) \bigr\|^2_2 \rightarrow \min_{\btheta}
+                \sum_{t=1}^T {\color{violet}\sigma_t^2} \cdot \bbE_{\pd(\bx)} \bbE_{q(\bx_t | \bx)}\bigl\| \bs_{\btheta, \sigma_t}(\bx_t) - \nabla_{\bx_t} \log q(\bx_t | \bx) \bigr\|^2_2 \rightarrow \min_{\btheta}
             \]
             \vspace{-0.5cm}
             \item Sample using \textbf{annealed} Langevin dynamics (for $t=1, \dots, T$).
@@ -257,7 +257,7 @@
             \item Variational posterior distribution (encoder)
             \vspace{-0.3cm}
             \[
-                q(\bz | \bx) = q(\bx_1, \dots, \bx_T | \bx_0) = \prod_{t = 1}^\top q(\bx_t | \bx_{t - 1}).
+                q(\bz | \bx) = q(\bx_1, \dots, \bx_T | \bx_0) = \prod_{t = 1}^T q(\bx_t | \bx_{t - 1}).
             \]
             \item \textbf{Note:} there are no learnable parameters.
         \end{itemize}
@@ -313,7 +313,7 @@
         \vspace{-0.5cm}
         \begin{align*}
             \cL_{\bphi, \btheta}(\bx) &= \bbE_{q({\color{teal}\bx_{1:T}} | \bx_0)} \log \frac{\pt(\bx_0, {\color{teal}\bx_{1:T}})}{q({\color{teal}\bx_{1:T}} | \bx_0)} \\
-            \nextonslide{& = \bbE_{q(\bx_{1:T} | \bx_0)} \log \frac{p(\bx_T) \prod_{t=1}^\top \pt(\bx_{t-1} | \bx_t) }{\prod_{t=1}^\top {\color{violet}q(\bx_t | \bx_{t-1})}}}
+            \nextonslide{& = \bbE_{q(\bx_{1:T} | \bx_0)} \log \frac{p(\bx_T) \prod_{t=1}^T \pt(\bx_{t-1} | \bx_t) }{\prod_{t=1}^T {\color{violet}q(\bx_t | \bx_{t-1})}}}
         \end{align*}
         \vspace{-0.3cm}
         \eqpause
@@ -336,8 +336,8 @@
         \vspace{-0.6cm}
         {\small
         \begin{align*}
-            \cL_{\bphi, \btheta}(\bx) & = \bbE_{q(\bx_{1:T} | \bx_0)} \log \frac{p(\bx_T) \prod_{t=1}^\top \pt(\bx_{t-1} | \bx_t) }{\prod_{t=1}^\top {\color{violet}q(\bx_t | \bx_{t-1})}}  \\ 
-            \nextonslide{& = \bbE_{q(\bx_{1:T} | \bx_0)} \log \frac{p(\bx_T) \prod_{t=1}^\top \pt(\bx_{t-1} | \bx_t) }{\prod_{t=1}^\top q(\bx_t | \bx_{t-1}, {\color{olive}\bx_0})}  }\\ 
+            \cL_{\bphi, \btheta}(\bx) & = \bbE_{q(\bx_{1:T} | \bx_0)} \log \frac{p(\bx_T) \prod_{t=1}^T \pt(\bx_{t-1} | \bx_t) }{\prod_{t=1}^T {\color{violet}q(\bx_t | \bx_{t-1})}}  \\ 
+            \nextonslide{& = \bbE_{q(\bx_{1:T} | \bx_0)} \log \frac{p(\bx_T) \prod_{t=1}^T \pt(\bx_{t-1} | \bx_t) }{\prod_{t=1}^T q(\bx_t | \bx_{t-1}, {\color{olive}\bx_0})}  }\\ 
             \nextonslide{& = \bbE_{q(\bx_{1:T} | \bx_0)} \log \frac{p(\bx_T) \pt(\bx_0 | \bx_1) \prod_{t=2}^\top \pt(\bx_{t-1} | \bx_t) }{q(\bx_1 | \bx_0)\prod_{t=2}^\top {\color{teal}q(\bx_t | \bx_{t-1}, \bx_0)}} }\\
             \nextonslide{& = \bbE_{q(\bx_{1:T} | \bx_0)} \log \frac{p(\bx_T) \pt(\bx_0 | \bx_1) \prod_{t=2}^\top \pt(\bx_{t-1} | \bx_t) }{{\color{violet}q(\bx_1 | \bx_0)}\prod_{t=2}^\top \frac{q(\bx_{t-1}|\bx_t, \bx_0) {\color{violet}q(\bx_{t} | \bx_0)}}{{\color{violet}q(\bx_{t-1}| \bx_0)}}} }\\
             \nextonslide{& = \bbE_{q(\bx_{1:T} | \bx_0)} \log \frac{{\color{violet}p(\bx_T)} {\color{olive}\pt(\bx_0 | \bx_1)} \prod_{t=2}^\top \pt(\bx_{t-1} | \bx_t) }{{\color{violet}q(\bx_T | \bx_0)}\prod_{t=2}^\top q(\bx_{t-1}|\bx_t, \bx_0)} }

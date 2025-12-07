@@ -226,11 +226,11 @@
 	Let's turn this Markov chain into a continuous stochastic process by letting $T \rightarrow \infty$ and setting $\beta_t = \beta(\frac{t}{T}) \cdot \frac{1}{T}$ (where $dt = \frac{1}{T}$):
 	\begin{multline*}
 		{\color{teal}\bx(t)} = \sqrt{1 - \beta(t) dt} \cdot \bx(t - dt) + \sqrt{\beta(t)dt} \cdot \bepsilon 
-		\nextonslide{\approx \\ \approx (1 - \frac{1}{2} \beta(t) dt) \cdot \bx(t - dt) + \sqrt{\beta(t){\color{violet}dt}} \cdot {\color{violet}\bepsilon}}
+		\nextonslide{\approx \\ \approx \left(1 - \frac{1}{2} \beta(t) dt\right) \cdot \bx(t - dt) + \sqrt{\beta(t){\color{violet}dt}} \cdot {\color{violet}\bepsilon}}
 		\nextonslide{= \\ = {\color{teal}\bx(t - dt)} - \frac{1}{2} \beta(t) \bx(t - dt) dt  + \sqrt{\beta(t)} \cdot {\color{violet}d \bw}}
 	\end{multline*}
     \eqpause
-	\vspace{-0.5cm}
+	\vspace{-0.7cm}
 	\begin{block}{Variance Preserving SDE}
 		\vspace{-0.3cm}
 		\[
@@ -278,7 +278,7 @@
 		\[
 			d \bx = {\color{teal}- \frac{1}{2} \beta(t) \bx(t)} dt + {\color{violet}\sqrt{\beta(t)}} \cdot d \bw
 		\]
-		\vspace{-0.5cm}
+		\vspace{-0.7cm}
 	\end{block}
     \eqpause
 	\begin{block}{Efficient Solvers}
@@ -321,7 +321,7 @@
 	\myfootnotewithlink{https://users.aalto.fi/~asolin/sde-book/sde-book.pdf}{Särkkä S., Solin A. Applied stochastic differential equations, 2019}
 	\vspace{-0.3cm}
 	\begin{block}{Continuous-Time Objective}
-		\vspace{-0.5cm}
+		\vspace{-0.7cm}
 		\[
 			\bbE_{\pd(\bx(0))} \bbE_{t \sim U[0, 1]} \bbE_{q(\bx(t) | \bx(0))}\bigl\| \bs_{\btheta}(\bx(t), t) - {\color{teal}\nabla_{\bx(t)} \log q(\bx(t) | \bx(0))} \bigr\|^2_2 
 		\]
@@ -329,11 +329,12 @@
 	\end{block}
     \eqpause
 	\[
-		q(\bx(t) | \bx(0)) = \cN\Bigl(\bmu(\bx(t), \bx(0)), \bsigma^2(\bx(t), \bx(0)) \cdot \bI \Bigr)
+		q(\bx(t) | \bx(0)) = \cN\Bigl(\bmu(t, \bx(0)), \bsigma^2(t, \bx(0)) \cdot \bI \Bigr) 
 	\]
 	\[
 		\nabla_{\bx(t)} \log q(\bx(t) | \bx(0)) = - \frac{1}{\bsigma} \odot (\bx(t) - \bmu)
 	\]
+	\textbf{Note:} Normality holds for $\bff(\bx, t)$ affine in $\bx$.
     \eqpause
 	\[
 		d \bx = \sqrt{\frac{ d [\sigma^2(t)]}{dt}} \cdot d \bw \ \ \mbox{(Variance Exploding SDE)}
@@ -342,23 +343,22 @@
 	\[
 		d \bx = - \frac{1}{2} \beta(t) \bx(t) dt + \sqrt{\beta(t)} \cdot d \bw \ \ \mbox{(Variance Preserving SDE)}
 	\]
-    \eqpause
-	Is it possible to explicitly derive $\bmu(\bx(t), \bx(0))$ and $\bSigma(\bx(t), \bx(0))$ for VE-SDE and VP-SDE?
+	Is it possible to explicitly derive $\bmu(t, \bx(0))$ and $\bSigma(t, \bx(0))$ for VE-SDE and VP-SDE?
 \end{frame}
 %=======
 \begin{frame}{Score-Based Generative Models Through SDEs}
 	\myfootnotewithlink{https://users.aalto.fi/~asolin/sde-book/sde-book.pdf}{Särkkä S., Solin A. Applied stochastic differential equations, 2019}
 	\[
-		q(\bx(t) | \bx(0)) = \cN\Bigl(\bmu(\bx(t), \bx(0)), \bSigma(\bx(t), \bx(0))\Bigr)
+		q(\bx(t) | \bx(0)) = \cN\Bigl(\bmu(t, \bx(0)), \bSigma(t, \bx(0))\Bigr)
 	\]
 	\vspace{-0.5cm}
 	\begin{block}{Theorem}
 		The moments of the SDE $d\bx = \bff(\bx, t) dt + g(t) d \bw$ satisfy:
 		\[
-			\frac{d \bmu(\bx(t), \bx(0))}{dt} = \bbE \left[ \bff(\bx(t), t) | \bx(0)\right]
+			\frac{d \bmu(t, \bx(0))}{dt} = \bbE \left[ \bff(\bx(t), t) | \bx(0)\right]
 		\]
 		\[
-			\frac{d \bSigma(\bx(t), \bx(0))}{dt} = \bbE \left[ \bff \cdot (\bx(t) - \bmu)^\top + (\bx(t) - \bmu) \cdot \bff^\top | \bx(0)\right] + g^2(t) \cdot \bI
+			\frac{d \bSigma(t, \bx(0))}{dt} = \bbE \left[ \bff \cdot (\bx(t) - \bmu)^\top + (\bx(t) - \bmu) \cdot \bff^\top | \bx(0)\right] + g^2(t) \cdot \bI
 		\]
 	\end{block}
     \eqpause
@@ -377,7 +377,7 @@
 	\begin{block}{Theorem}
 		\vspace{-0.3cm}
 		\[
-			\frac{d \bmu(\bx(t), \bx(0))}{dt} = \bbE \left[ \bff(\bx(t), t) | \bx(0)\right]
+			\frac{d \bmu(t, \bx(0))}{dt} = \bbE \left[ \bff(\bx(t), t) | \bx(0)\right]
 		\]
 		\vspace{-0.5cm}
 	\end{block}
@@ -389,7 +389,7 @@
 		\]
         \eqpause
 		\[
-			\frac{d \bbE\left[\bx(t) | \bx(0) \right]}{dt} = \frac{d \bmu(\bx(t), \bx(0))}{dt} = \bbE\left[\bff(\bx, t) | \bx(0) \right] 
+			\frac{d \bbE\left[\bx(t) | \bx(0) \right]}{dt} = \frac{d \bmu(t, \bx(0))}{dt} = \bbE\left[\bff(\bx, t) | \bx(0) \right] 
 		\]
 	\end{block}
     \eqpause
@@ -422,7 +422,7 @@
 		\vspace{-0.7cm}
 	\end{block}
 	\[
-		q(\bx(t) | \bx(0)) = \cN\Bigl(\bmu(\bx(t), \bx(0)), \bSigma(\bx(t), \bx(0))\Bigr)
+		q(\bx(t) | \bx(0)) = \cN\Bigl(\bmu(t, \bx(0)), \bSigma(t, \bx(0))\Bigr)
 	\]
     \eqpause
 	\vspace{-0.5cm}
@@ -441,7 +441,6 @@
 		\]
 		\vspace{-0.5cm}
 	\end{block}
-    \eqpause
 	Here we omit the derivations of the variance.
 	
 \end{frame}
@@ -604,7 +603,7 @@
 		\[
 			\bbE_{t \sim U[0, 1]} \bbE_{\bz \sim p(\bz)} \bbE_{\bx \sim p_t(\bx | \bz)}\left\| \bff(\bx, \bz, t) - \bff_{\btheta}(\bx, t) \right\|^2 \rightarrow \min_{\btheta}
 		\]
-		\vspace{-0.3cm}
+		\vspace{-0.5cm}
 	\end{block}
     \eqpause
 	\begin{block}{Theorem}
@@ -614,55 +613,6 @@
 	\begin{block}{Proof}
 		This can be proved in a similar way as in the denoising score matching theorem.
 	\end{block}
-\end{frame}
-%=======
-\begin{frame}{Conditional Flow Matching}
-    \myfootnotewithlink{https://arxiv.org/abs/2302.00482}{Tong A., et al. Improving and Generalizing Flow-Based Generative Models with Minibatch Optimal Transport, 2023}
-	\begin{block}{Theorem}
-		\vspace{-0.7cm}
-		\begin{multline*}
-			\argmin_{\btheta} \bbE_{t \sim U[0, 1]} \bbE_{\bx \sim p_t(\bx)}\left\| \bff(\bx, t) - \bff_{\btheta}(\bx, t) \right\|^2 = \\
-			= \argmin_{\btheta} \bbE_{t \sim U[0, 1]} \bbE_{\bz \sim p(\bz)} \bbE_{\bx \sim p_t(\bx | \bz)}\left\| \bff(\bx, \bz, t) - \bff_{\btheta}(\bx, t) \right\|^2
-		\end{multline*}
-		\vspace{-0.7cm}
-	\end{block}
-    \eqpause
-	\begin{block}{Proof}
-		\vspace{-0.5cm}
-		{\small
-		\begin{multline*}
-			\bbE_{\bx \sim p_t(\bx)}\left\| \bff(\bx, t) - \bff_{\btheta}(\bx, t) \right\|^2 = \\ 
-			= {\color{olive}\bbE_{\bz \sim p(\bz)} \bbE_{\bx \sim p_t(\bx | \bz)}}\left[\| \bff_{\btheta}(\bx, t) \|^2 - 2 {\color{teal}\bff_{\btheta}^\top(\bx, t)\bff(\bx, t)} \right] + \text{const}(\btheta)
-		\end{multline*}
-		}
-		\eqpause
-		\vspace{-1.0cm}
-		{\small
-		\begin{multline*}
-			\bbE_{p_t(\bx)} \left[{\color{teal}\bff_{\btheta}^\top(\bx, t)\bff(\bx, t)} \right] = \int p_t(\bx) \left[\bff_{\btheta}^\top(\bx, t) \left( \int p_t(\bz | \bx)\bff(\bx, \bz, t)d\bz \right) \right] d\bx 
-			\nextonslide{ = \\ = \int \int {\color{violet}p_t(\bx) p_t(\bz | \bx)} \left[\bff_{\btheta}^\top(\bx, t) \bff(\bx, \bz, t) \right] d\bz d\bx}
-			\nextonslide{ = \\ = {\color{violet}\bbE_{p(\bz)} \bbE_{p_t(\bx | \bz)}} \left[\bff_{\btheta}^\top(\bx, t) \bff(\bx, \bz, t) \right]}
-		\end{multline*}
-		}
-	\end{block}
-\end{frame}
-%=======
-\begin{frame}{Conditional Flow Matching}
-    \myfootnotewithlink{https://dl.heeere.com/conditional-flow-matching/blog/conditional-flow-matching}{image credit: A Visual Dive into Conditional Flow Matching}
-	\begin{figure}
-		\centering
-		\includegraphics[width=0.75\linewidth]{figs/cfm_uncond_to_cond}
-	\end{figure}
-    \eqpause
-	\begin{itemize}
-		\item We don't want to directly model $p_t(\bx)$, since it's complex.
-		\item We've shown it's possible to solve the CFM task instead of the FM task.
-		\item Let's choose a convenient conditioning latent variable $\bz$.
-		\item We'll parametrize $p_t(\bx | \bz)$ instead of $p_t(\bx)$. It should satisfy the following constraints:
-		\[
-			p(\bx) = \cN(0, \bI) = \bbE_{p(\bz)} p_0(\bx | \bz); \quad \pd(\bx) = \bbE_{p(\bz)} p_1(\bx | \bz).
-		\]
-	\end{itemize}
 \end{frame}
 %=======
 \begin{frame}{Summary}
@@ -678,4 +628,5 @@
 		\item Conditional flow matching introduces the latent variable $\bz$, reformulating the initial task in terms of conditional dynamics.
 	\end{itemize}
 \end{frame}
+%=======
 \end{document}

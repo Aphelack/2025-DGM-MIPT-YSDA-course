@@ -52,8 +52,9 @@
 	\begin{block}{Conditional Distribution}
 		\vspace{-0.5cm}
 		\begin{align*}
-			{\color{olive}\nabla_{\bx_t} \log \pt(\bx_t | \by)} &= \nabla_{\bx_t} \log p(\by | \bx_t) + {\color{violet}\nabla_{\bx_t} \log \pt(\bx_t)}\\
-			&= {\color{teal}\nabla_{\bx_t} \log p(\by | \bx_t)} {\color{violet}- \frac{\bepsilon_{\btheta, t}(\bx_t)}{\sqrt{1 - \bar{\alpha}_t}}}
+			{\color{olive}\nabla_{\bx_t} \log \pt(\bx_t | \by)} &
+			= {\color{violet}\nabla_{\bx_t} \log \pt(\bx_t)} + \nabla_{\bx_t} \log p(\by | \bx_t) \\
+			&= {\color{violet} \bs_{\btheta, t}(\bx_t)} + {\color{teal}\nabla_{\bx_t} \log p(\by | \bx_t)}
 		\end{align*}
 		\vspace{-0.5cm}
 	\end{block}
@@ -62,58 +63,58 @@
 %=======
 \begin{frame}{Recap of Previous Lecture}
 	\myfootnotewithlink{https://arxiv.org/abs/2105.05233}{Dhariwal P., Nichol A. Diffusion Models Beat GANs on Image Synthesis, 2021}
-	\begin{block}{Classifier-Corrected Noise Prediction}
-		\vspace{-0.3cm}
-		\[
-			\bepsilon_{\btheta, t}(\bx_t, \by) = \bepsilon_{\btheta, t}(\bx_t) - \sqrt{1 - \bar{\alpha}_t} \cdot \nabla_{\bx_t} \log p(\by | \bx_t)
-		\]
-		\vspace{-0.7cm}
-	\end{block}
-	\begin{block}{Guidance Scale}
-		\vspace{-0.3cm}
-		\[
-			{\color{olive}\bepsilon_{\btheta, t}(\bx_t, \by)} = \bepsilon_{\btheta, t}(\bx_t) - {\color{teal}\gamma} \cdot \sqrt{1 - \bar{\alpha}_t} \cdot \nabla_{\bx_t} \log p(\by | \bx_t)
-		\]
+	\begin{block}{Guided Score Function}
+		\vspace{-0.5cm}
+		\begin{align*}
+			\bs_{\btheta, t}(\bx_t, \by) &= \bs_{\btheta, t}(\bx_t) + \nabla_{\bx_t} \log p(\by | \bx_t) \\
+			{\color{olive}\bs^{\gamma}_{\btheta, t}(\bx_t, \by)} &= \bs_{\btheta, t}(\bx_t) + {\color{teal}\gamma} \cdot \nabla_{\bx_t} \log p(\by | \bx_t)
+		\end{align*}
 		\vspace{-0.5cm}
 	\end{block}
-	\begin{itemize}
-		\item Train DDPM as usual.
-		\item Train a separate classifier $p(\by | \bx_t)$ on noisy samples $\bx_t$.
-	\end{itemize}
+	\textbf{Note:} Increasing $\gamma$ sharpens $p(\by | \bx_t)$, making it more contrast
+	\[
+		\hat{p}(\by | \bx_t) \propto p(\by | \bx_t)^{\gamma}.
+	\]
+	\vspace{-0.7cm}
+	\begin{block}{Training}
+		\begin{itemize}
+			\item Train the DDPM as before.
+			\item Train an additional classifier $p(\by | \bx_t)$ on noisy data.
+		\end{itemize}
+		\vspace{-0.3cm}
+	\end{block}
 	\begin{block}{Guided Sampling}
 		\vspace{-0.3cm}
 		\[
-			\bx_{t-1} = \frac{1}{\sqrt{\alpha_t}} \cdot \bx_t - \frac{1 - \alpha_t}{\sqrt{\alpha_t (1 - \bar{\alpha}_t)}} \cdot  {\color{olive}\bepsilon_{\btheta, t}(\bx_t, \by)} + \sigma_t \cdot \bepsilon
+			\bx_{t-1} = \frac{1}{\sqrt{1 - \beta_t}} \cdot \bx_t + \frac{\beta_t}{\sqrt{1 - \beta_t}} \cdot  {\color{olive}\bs^{\gamma}_{\btheta, t}(\bx_t, \by)} + \sigma_t \cdot \bepsilon
 		\]
-		\vspace{-0.3cm}
 	\end{block}
-	\textbf{Note:} The guidance scale $\gamma$ sharpens the distribution $p(\by | \bx_t)$.
 \end{frame}
 %=======
 \begin{frame}{Recap of Previous Lecture}
 	\myfootnotewithlink{https://arxiv.org/abs/2207.12598}{Ho J., Salimans T. Classifier-Free Diffusion Guidance, 2022}
-	The previous method requires an additional classifier $p(\by | \bx_t)$ trained on noisy data. Let's try to avoid this requirement.
+	\\ The previous method requires an additional classifier $p(\by | \bx_t)$ trained on noisy data. Let's try to avoid this requirement.
 	\[
 		{\color{teal}\nabla_{\bx_t} \log p(\by | \bx_t)} =  \nabla_{\bx_t} \log \pt(\bx_t| \by) -\nabla_{\bx_t} \log  \pt(\bx_t)
 	\]
-	\vspace{-0.4cm}
+	\vspace{-0.7cm}
 	\begin{multline*}
 		\nabla_{\bx_t}^{\gamma} \log \pt(\bx_t | \by) = \nabla_{\bx_t} \log \pt(\bx_t) + \gamma \cdot \nabla_{\bx_t} {\color{violet}\log p(\by | \bx_t)} = \\
 		=  (1 - \gamma) \cdot  \nabla_{\bx_t} \log \pt(\bx_t) + \gamma \cdot  \nabla_{\bx_t} \log \pt(\bx_t| \by)
 	\end{multline*}
-	\vspace{-0.4cm}
-	\begin{block}{Classifier-Free-Corrected Noise Prediction}
+	\vspace{-0.5cm}
+	\begin{block}{Scaled Guided Score Function}
 		\vspace{-0.3cm}
 		\[
-			\hat{\bepsilon}_{\btheta, t}(\bx_t, \by) = \gamma \cdot \bepsilon_{\btheta, t}(\bx_t, \by) + (1 - \gamma) \cdot \bepsilon_{\btheta, t}(\bx_t)
+			\bs^{\gamma}_{\btheta, t}(\bx_t, \by) = (1 - \gamma) \cdot \bs_{\btheta, t}(\bx_t) +  \gamma \cdot \bs_{\btheta, t}(\bx_t, \by)
 		\]
 		\vspace{-0.5cm}
 	\end{block}
 	\begin{itemize}
-		\item Train one model $\bepsilon_{\btheta, t}(\bx_t, \by)$ on \textbf{supervised} data, alternating between true conditioning $\by$ and empty conditioning $\by = \emptyset$.
-		\item During inference, apply this model twice.
+		\item Introduce $\by = \varnothing$  for $\bs_{\btheta, t}(\bx_t) = \bs_{\btheta, t}(\bx_t, \varnothing)$.		
+		\item Drop the labels $\by$ with some fixed probability.
+		\item Apply the model twice during inference to get $\bs_{\btheta, t}(\bx_t, \varnothing)$ and $\bs_{\btheta, t}(\bx_t, \by)$.
 	\end{itemize}
-	
 \end{frame}
 %=======
 \begin{frame}{Recap of Previous Lecture}
@@ -194,6 +195,7 @@
 		\[
 			\log p_1(\bx(1)) = \log p_0(\bx(0)) - {\color{teal}\int_{0}^{1} \tr  \left( \frac{\partial \bff(\bx(t), t)}{\partial \bx(t)} \right) dt}.
 		\]
+		\vspace{-0.3cm}
 	\end{block}
 	\eqpause
 	\begin{itemize}
@@ -206,8 +208,9 @@
 %=======
 \begin{frame}{Stochastic Differential Equation (SDE)}
 	\myfootnotewithlink{https://arxiv.org/abs/2506.02070}{Holderrieth P., Erives E. An Introduction to Flow Matching and Diffusion Models, 2025}
+	\vspace{-0.3cm}
 	\begin{block}{Wiener Process}
-		$\bw(t)$ is the standard Wiener process (Brownian motion), defined by:
+		$\bw(t)$ is the standard Wiener process (Brownian motion), defined~by:
 		\vspace{-0.3cm}
 		\begin{minipage}{0.5\columnwidth}
 			\begin{enumerate}
@@ -222,6 +225,7 @@
 			\includegraphics[width=\linewidth]{figs/brownian_motion}
 		\end{minipage}
 	\end{block}
+	\vspace{0.3cm}
 	\eqpause
 	$d\bw = \bw(t+dt) - \bw(t) = \cN(0, \bI \cdot dt ) = \bepsilon \cdot \sqrt{dt}$, where $\bepsilon \sim \cN(0, \bI)$.
 \end{frame}
@@ -241,7 +245,7 @@
 		 \item $\bff(\bx, t): \bbR^m \times [0, 1] \rightarrow \bbR^m$ is the \textbf{drift} term (vector field).
 		 \item $g(t): \bbR \rightarrow \bbR$ is the \textbf{diffusion} term (if $g(t)=0$, we recover the standard ODE).
 		 \item $\bw(t)$ is the standard Wiener process ($d\bw = \bepsilon \cdot \sqrt{dt}$).
-		 \item We do not have the flow $\bpsi_t(\bx_0)$ notion anymore, since trajectories are stochastic
+		 \item We do not have the flow $\bpsi_t(\bx_0)$ notion anymore, since trajectories are stochastic.
 	\end{itemize}
 \end{frame}
 %=======
@@ -250,7 +254,8 @@
 		d\bx = \bff(\bx, t) dt + g(t) d \bw
 	\]
 	\begin{block}{Theorem}
-		If $\bff$ is continuously differentiable with a bounded derivative in $\bx$ and continuous in $t$ and $g(t)$ is continuous then the SDE has the solution given by unique proces $\bx(t)$.
+		If $\bff$ is continuously differentiable with a bounded derivative in $\bx$ 
+		and continuous in $t$ and $g(t)$ is continuous then the SDE has the solution given by unique process $\bx(t)$.
 	\end{block}
 
 	\begin{itemize}
@@ -272,12 +277,12 @@
 	\begin{block}{Discretizing the SDE (Euler Update Step) – \texttt{SDESolve}}
 		\vspace{-0.3cm}
 		\[
-			\bx(t + dt) = \bx(t) + \bff(\bx(t), t) \cdot dt + g(t) \cdot \bepsilon \cdot \sqrt{dt}
+			{\color{violet}\bx(t + dt) = \bx(t) + \bff(\bx(t), t) \cdot dt} + {\color{teal}g(t) \cdot \bepsilon \cdot \sqrt{dt}}
 		\]
 		If $dt=1$, then
 		\vspace{-0.3cm}
 		\[
-			\bx_{t + 1} = \bx_t + \bff(\bx_t, t) + g(t) \cdot \bepsilon
+			{\color{violet}\bx_{t + 1} = \bx_t + \bff(\bx_t, t)} + {\color{teal}g(t) \cdot \bepsilon}
 		\]
 		\vspace{-0.7cm}
 	\end{block}
