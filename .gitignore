@@ -29,3 +29,5 @@ homeworks/MNIST/
 Vision-Transformer-VIT-for-MNIST/
 
 homeworks/cifar-10*
+
+homeworks/*.pth
