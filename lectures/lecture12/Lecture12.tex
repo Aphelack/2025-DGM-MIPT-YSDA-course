@@ -223,7 +223,7 @@
 \begin{frame}{Conditional Flow Matching}
 	\myfootnotewithlink{https://arxiv.org/abs/2210.02747}{Lipman Y., et al. Flow Matching for Generative Modeling, 2022}
 	\[
-		\bbE_{t \sim U[0, 1]} \bbE_{\bz \sim p(\bz)} \bbE_{\bx_t \sim p_t(\bx | \bz)}\left\| \bff(\bx_t, \bz, t) - \bff_{\btheta}(\bx_t, t) \right\|^2 \rightarrow \min_{\btheta}
+		\bbE_{t \sim U[0, 1]} \bbE_{\bz \sim p(\bz)} \bbE_{\bx \sim p_t(\bx | \bz)}\left\| \bff(\bx, \bz, t) - \bff_{\btheta}(\bx, t) \right\|^2 \rightarrow \min_{\btheta}
 	\]
 	\[
 		p(\bx) = \cN(0, \bI) = \bbE_{p(\bz)} p_0(\bx | \bz); \quad \pd(\bx) = \bbE_{p(\bz)} p_1(\bx | \bz).
@@ -253,7 +253,7 @@
 	\myfootnotewithlink{https://arxiv.org/abs/2302.00482}{Tong A., et al. Improving and Generalizing Flow-Based Generative Models with Minibatch Optimal Transport, 2023}
 	\vspace{-0.3cm}
 	\[
-		\bbE_{t \sim U[0, 1]} \bbE_{\bz \sim p(\bz)} \bbE_{\bx_t \sim p_t(\bx | \bz)}\left\| \bff(\bx_t, \bz, t) - \bff_{\btheta}(\bx_t, t) \right\|^2 \rightarrow \min_{\btheta}
+		\bbE_{t \sim U[0, 1]} \bbE_{\bz \sim p(\bz)} \bbE_{\bx \sim p_t(\bx | \bz)}\left\| \bff(\bx, \bz, t) - \bff_{\btheta}(\bx, t) \right\|^2 \rightarrow \min_{\btheta}
 	\]
 	\eqpause
 	\vspace{-0.4cm}
@@ -321,7 +321,7 @@
 	\begin{block}{Conditional Flow Matching}
 		\vspace{-0.5cm}
 		\[
-			\bbE_{t \sim U[0, 1]} \bbE_{\bz \sim p(\bz)} \bbE_{\bx_t \sim p_t(\bx | \bz)}\left\| \bff(\bx_t, \bz, t) - \bff_{\btheta}(\bx_t, t) \right\|^2 \rightarrow \min_{\btheta}
+			\bbE_{t \sim U[0, 1]} \bbE_{\bz \sim p(\bz)} \bbE_{\bx \sim p_t(\bx | \bz)}\left\| \bff(\bx, \bz, t) - \bff_{\btheta}(\bx, t) \right\|^2 \rightarrow \min_{\btheta}
 		\]
 		\vspace{-0.5cm}
 	\end{block}
@@ -428,7 +428,7 @@
 	\vspace{-0.5cm}
 	\begin{multline*}
 		\bbE_{t \sim U[0, 1]} \bbE_{\bz \sim p(\bz)} \bbE_{\bx \sim p_t(\bx | \bz)}\left\| {\color{olive}\bff(\bx, \bz, t)} - \bff_{\btheta}(\bx, t) \right\|^2
-		= \\ = \bbE_{t \sim U[0, 1]} \bbE_{\bx_1 \sim \pd(\bx)} {\color{violet}\bbE_{\bx_t \sim p_t(\bx | \bx_1)}}\left\| {\color{olive}\frac{\bx_1 - \bx_t}{1-t}} - \bff_{\btheta}({\color{teal}\bx_t}, t) \right\|^2
+		= \\ = \bbE_{t \sim U[0, 1]} \bbE_{\bx_1 \sim \pd(\bx)} {\color{violet}\bbE_{\bx \sim p_t(\bx | \bx_1)}}\left\| {\color{olive}\frac{\bx_1 - \bx}{1-t}} - \bff_{\btheta}({\color{teal}\bx}, t) \right\|^2
 		\nextonslide{ = \\ = \bbE_{t \sim U[0, 1]} \bbE_{\bx_1 \sim \pd(\bx)} {\color{violet}\bbE_{\bx_0 \sim \cN(0, \bI)}}\left\| (\bx_1 - \bx_0) - \bff_{\btheta}\left({\color{teal}t \bx_1 + (1 - t) \bx_0}, t\right) \right\|^2}
 	\end{multline*}
 	\eqpause
@@ -464,7 +464,7 @@
 			\item Sample $\bx_1 \sim \pd(\bx)$.
 			\item Sample time $t \sim U[0, 1]$ and $\bx_0 \sim \cN(0, \bI)$.
 			\item Obtain the noisy image $\bx_t = t \bx_1 + (1 - t) \bx_0$.
-			\item Compute the loss $ \cL = \left\| (\bx_1 - \bx_0) - \bff_{\btheta}(\bx, t) \right\|^2 $.
+			\item Compute the loss $ \cL = \left\| (\bx_1 - \bx_0) - \bff_{\btheta}(\bx_t, t) \right\|^2 $.
 		\end{enumerate}
 	\end{block}
 	\eqpause
@@ -615,7 +615,7 @@
 		\vspace{-0.7cm}
 		\begin{multline*}
 			\bbE_{t \sim U[0, 1]} \bbE_{\bz \sim p(\bz)} \bbE_{\bx \sim p_t(\bx | \bz)}\left\| \bff(\bx, \bz, t) - \bff_{\btheta}(\bx, t) \right\|^2 = \\
-		 \bbE_{t \sim U[0, 1]} \bbE_{(\bx_0, \bx_1) \sim p(\bx_0, \bx_1)} \bbE_{\bx \sim p_t(\bx | \bx_0, \bx_1)} \left\| (\bx_1 - \bx_0) - \bff_{\btheta}(\bx_t, t) \right\|^2
+		 \bbE_{t \sim U[0, 1]} \bbE_{(\bx_0, \bx_1) \sim p(\bx_0, \bx_1)} \bbE_{\bx \sim p_t(\bx | \bx_0, \bx_1)} \left\| (\bx_1 - \bx_0) - \bff_{\btheta}(\bx, t) \right\|^2
 		\end{multline*}
 	\end{block}
 	\eqpause
@@ -638,7 +638,7 @@
 			\item Sample $(\bx_0, \bx_1) \sim p(\bx_0, \bx_1)$.
 			\item Sample time $t \sim U[0, 1]$.
 			\item Compute the noisy image $\bx_t = t \bx_1 + (1 - t) \bx_0$.
-			\item Compute the loss $ \cL = \left\| (\bx_1 - \bx_0) - \bff_{\btheta}(\bx, t) \right\|^2 $.
+			\item Compute the loss $ \cL = \left\| (\bx_1 - \bx_0) - \bff_{\btheta}(\bx_t, t) \right\|^2 $.
 		\end{enumerate}
 	\end{block}
 	\eqpause
@@ -662,120 +662,13 @@
 	\end{figure}
 \end{frame}
 %=======
-\section{Link with Score-Based Models}
-%=======
-\begin{frame}{Score-Based Generative Models through SDEs}
-	\myfootnotewithlink{https://arxiv.org/abs/2210.02747}{Lipman Y., et al. Flow Matching for Generative Modeling, 2022}
-	\vspace{-0.3cm}
-	\begin{block}{Training}
-		\vspace{-0.7cm}
-		\[
-			\bbE_{\pd(\bx(0))} \bbE_{t \sim U[0, 1]} \bbE_{q(\bx(t) | \bx(0))}\bigl\| \bs_{\btheta}(\bx(t), t) - {\color{teal}\nabla_{\bx(t)} \log q(\bx(t) | \bx(0))} \bigr\|^2_2 
-		\]
-		\vspace{-0.5cm}
-	\end{block}
-	\eqpause
-	\begin{block}{Variance Exploding SDE (NCSN)}
-		\vspace{-0.3cm}
-		\[
-			q(\bx(t) | \bx(0)) = \cN\left(\bx(0), \left[\sigma^2(t) - \sigma^2(0)\right] \cdot \bI\right), \quad \sigma(0) =0
-		\]
-		\vspace{-0.5cm}
-	\end{block}
-	\begin{block}{Variance Preserving SDE (DDPM)}
-		\vspace{-0.5cm}
-		\[
-			q(\bx(t) | \bx(0)) = \cN\left(\bx(0) \alpha(t), \left(1 - \alpha(t)^2\right) \cdot \bI\right); \quad \alpha(t) = e^{-\frac{1}{2} \int_0^t \beta(s) ds}
-		\]
-		\vspace{-0.5cm}
-	\end{block}
-	\eqpause
-	Flow matching uses reverse time direction:
-	\[
-		p_t(\bx_t| \bx_1) = q_{1-t}(\bx_{1-t}| \bx_0=\bx_1)
-	\]
-\end{frame}
-%=======
-\begin{frame}{Score-Based Generative Models through SDEs}
-	\[
-		p_t(\bx_t| \bx_1) = q_{1-t}(\bx_{1-t}| \bx_0=\bx_1)
-	\]
-	\[
-		\textbf{VE (NCSN): } p(\bx_t | \bx_1) = \cN\left(\bx_1, \sigma^2_{1-t} \cdot \bI\right)
-	\]
-	\vspace{-0.5cm}
-	\[
-		\textbf{VP (DDPM): } p(\bx_t | \bx_1) = \cN\left(\alpha_{1-t} \bx_1, \left(1 - \alpha_{1-t}^2\right) \cdot \bI\right)
-	\]
-	\vspace{-0.5cm}
-	\eqpause
-	\begin{block}{Flow Matching Probability Path}
-		\vspace{-0.3cm}
-		\[
-			p_t(\bx_t | \bx_1) = \cN\left(t \bx_1, (1-t)^2 \bI\right); \quad \bff(\bx, \bx_1, t) = \frac{\bx_1  - \bx_t}{1-t}
-		\]
-		\vspace{-0.3cm}
-		\[
-	 		\frac{d\bx_t}{dt} = \bff(\bx_t, \bx_1, t) =  \bmu_t'(\bx_1) + \frac{\bsigma_t'(\bx_1)}{\bsigma_t(\bx_1)} \odot (\bx_t - \bmu_t(\bx_1))
-		\]
-	\end{block}
-	\eqpause
-	Let's derive the conditional vector fields for VE (NCSN) and VP (DDPM).
-\end{frame}
-%=======
-\begin{frame}{Flow Matching vs. Score-Based SDE Models}
-	\myfootnotewithlink{https://arxiv.org/abs/2210.02747}{Lipman Y., et al. Flow Matching for Generative Modeling, 2022}
-	\[
-		\frac{d\bx_t}{dt} = \bff(\bx_t, \bx_1, t) =  \bmu_t'(\bx_1) + \frac{\bsigma_t'(\bx_1)}{\bsigma_t(\bx_1)} \odot (\bx_t - \bmu_t(\bx_1))
-	\]
-	\eqpause
-	\begin{block}{Variance Exploding SDE Probability Path}
-		\vspace{-0.5cm}
-		\[
-				p_t(\bx_t | \bx_1) = \cN\left(\bx_1, \sigma^2_{1-t}  \bI\right) \quad \Rightarrow \quad 
-				\bff(\bx_t, \bx_1, t) = - \frac{\sigma'_{1-t}}{\sigma_{1-t}} (\bx_t - \bx_1)
-		\]
-		\vspace{-0.3cm}
-	\end{block}
-	\eqpause
-	\begin{block}{Variance Preserving SDE Probability Path}
-		\vspace{-0.5cm}
-		{\small
-		\[
-			p_t(\bx_t | \bx_1) = \cN\left(\alpha_{1-t}  \bx_1, (1 - \alpha^2_{1-t})  \bI \right)  \, \Rightarrow \, 
-		\bff(\bx_t, \bx_1, t) = \frac{\alpha'_{1-t}}{1 - \alpha^2_{1-t}}\cdot \left(\alpha_{1-t}  \bx_t - \bx_1\right)
-		\]
-		}
-	\end{block}
-	Thus, VE/VP SDE models correspond to particular choices of the Gaussian probability path within the flow matching framework.
-\end{frame}
-%=======
-\begin{frame}{Flow Matching vs. Score-Based SDE Models}
-	\myfootnotewithlink{https://arxiv.org/abs/2210.02747}{Lipman Y., et al. Flow Matching for Generative Modeling, 2022}
-	\begin{block}{Trajectories}
-		\vspace{-0.3cm}
-		\begin{figure}
-			\centering
-			\includegraphics[width=0.6\linewidth]{figs/trajectories}
-		\end{figure}
-		\vspace{-0.3cm}
-	\end{block}
-	\eqpause
-	\begin{figure}
-		\centering
-		\includegraphics[width=\linewidth]{figs/2d-generation}
-	\end{figure}
-\end{frame}
-%=======
 \begin{frame}{Summary}
 	\begin{itemize}
 		\item Conditional flow matching makes the FM objective tractable.
 		\vfill
-		\item Conical Gaussian paths serve as an effective FM technique.
+		\item Conical Gaussian paths use endpoint conditioning $\bz = \bx_1$ and serve as an effective FM technique.
 		\vfill
-		\item Pair conditioning yields the same procedure, but is more general (suitable for paired tasks).
-		\vfill
-		\item Diffusion and score-based models are special cases of the flow matching approach, but use curved trajectories.
+		\item Linear Interpolation paths use pair conditioning $\bz = (\bx_0, \bx_1)$ and yields the same procedure, but is more general (suitable for paired tasks).
 	\end{itemize}
 \end{frame}
 \end{document}

@@ -47,12 +47,11 @@ The course is accompanied by practical tasks that allow you to understand the pr
 |  |  | <b>Seminar 10:</b> Guidance. CLIP, GLIDE, DALL-E 2, Imagen. | [slides](seminars/seminar10/) |
 | 11 | December, 2 | <b>Lecture 11:</b> Variance Preserving and Variance Exploding SDEs. Score-based generative models through SDE. Flow matching. | [slides](lectures/lecture11/Lecture11.pdf) |
 |  |  | <b>Seminar 11:</b> Latent Diffusion Model. Stable Diffusion. | [slides](seminars/seminar11/) <a href="https://colab.research.google.com/github/r-isachenko/2025-DGM-AIMasters-course/blob/main/seminars/seminar11/seminar11_SD.ipynb" target="_parent"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/></a> |
-| 12 | December, 9 | <b>Lecture 12:</b> Conditional flow matching. Conical gaussian paths. Linear interpolation. Link with diffusion and score matching. | [slides](lectures/lecture12/Lecture12.pdf) |
+| 12 | December, 9 | <b>Lecture 12:</b> Conditional flow matching. Conical gaussian paths. Linear interpolation. | [slides](lectures/lecture12/Lecture12.pdf) |
 |  |  | <b>Seminar 12:</b> Latent Diffusion Models Control Methods: ControlNet, IP-Adapter, Dreambooth, LoRA| [slides](seminars/seminar12/seminar_12_adapters.ipynb)|
-<!---
-| 13 | May, 22 | <b>Lecture 13:</b>  | [slides](lectures/lecture13/Lecture13.pdf) |
+| 13 | December, 16 | <b>Lecture 13:</b> Link with diffusion and score matching. Discrete Diffusion. Forward discrete process. Reverse discrete process. Discrete ELBO objective. | [slides](lectures/lecture13/Lecture13.pdf) |
 |  |  | <b>Seminar 13:</b> Latent Diffusion Models. Code. | [slides](seminars/seminar13/seminar13_SD.ipynb) <a href="https://colab.research.google.com/github/r-isachenko/2024-DGM-MIPT-YSDA-course/blob/main/seminars/seminar13/seminar13_SD.ipynb" target="_parent"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/></a> |
-
+<!---
 | 14 | December, 10 | <b>Lecture 14:</b> Latent space models. Course overview. | [slides](lectures/lecture14/Lecture14.pdf) |
 |  |  | <b>Seminar 14:</b>  The Final Recap| [slides](seminars/seminar14/seminar14.ipynb) |
 -->
@@ -67,8 +66,8 @@ The course is accompanied by practical tasks that allow you to understand the pr
 | 3 | October, 24 | November, 07 | <ol><li>Theory (ELBO surgery, Conjugate functions, FID for Normal distributions).</li><li>VQ-VAE on MNIST.</li><li>Wasserstein GANs for CIFAR 10.</li></ol> | [![Open In Github](https://img.shields.io/static/v1.svg?logo=github&label=Repo&message=Open%20in%20Github&color=lightgrey)](homeworks/hw3.ipynb)<br>[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/r-isachenko/2025-DGM-MIPT-YSDA-course/blob/main/homeworks/hw3.ipynb) |
 | 4 | November, 08 | November, 22 | <ol><li>Theory (Implicit score matching, Conditioned reverse distribution).</li><li>Denoising score matching on 2D data.</li><li>NCSN on MNIST.</li></ol> | [![Open In Github](https://img.shields.io/static/v1.svg?logo=github&label=Repo&message=Open%20in%20Github&color=lightgrey)](homeworks/hw4.ipynb)<br>[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/r-isachenko/2025-DGM-MIPT-YSDA-course/blob/main/homeworks/hw4.ipynb) |
 | 5 | November, 23 | December, 7 | <ol><li>Theory (Gaussian diffusion, Strided sampling, Tweedie's formula).</li><li>DDPM on 2D data.</li><li>DDPM on MNIST with guidance.</li></ol> | [![Open In Github](https://img.shields.io/static/v1.svg?logo=github&label=Repo&message=Open%20in%20Github&color=lightgrey)](homeworks/hw5.ipynb)<br>[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/r-isachenko/2025-DGM-MIPT-YSDA-course/blob/main/homeworks/hw5.ipynb) |
-<!---| 6 | May, 17 | May, 31 | <ol><li>Theory (KFP theorem, DDPM as SDE discretization, Covariance of forward SDE).</li><li>Flow matching on MNIST.</li><li>Rectified flow.</li><li>Flow matching with OT coupling.</li></ol> |  [![Open In Github](https://img.shields.io/static/v1.svg?logo=github&label=Repo&message=Open%20in%20Github&color=lightgrey)](homeworks/hw6.ipynb)<br>[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/r-isachenko/2025-DGM-MIPT-YSDA-course/blob/main/homeworks/hw6.ipynb) |
--->
+| 6 | December, 8 | December, 22 | <ol><li>Theory (KFP theorem, DDPM as SDE discretization, Covariance of forward SDE).</li><li>Flow matching on MNIST.</li><li>Rectified flow.</li><li>Flow matching with OT coupling.</li></ol> |  [![Open In Github](https://img.shields.io/static/v1.svg?logo=github&label=Repo&message=Open%20in%20Github&color=lightgrey)](homeworks/hw6.ipynb)<br>[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/r-isachenko/2025-DGM-MIPT-YSDA-course/blob/main/homeworks/hw6.ipynb) |
+
 
 ## Game rules
 - 6 homeworks each of 15 points = **90 points**

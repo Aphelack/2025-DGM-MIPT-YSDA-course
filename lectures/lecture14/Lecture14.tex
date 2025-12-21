@@ -11,354 +11,616 @@
 \end{frame}
 %=======
 \begin{frame}{Recap of Previous Lecture}
+	\myfootnotewithlink{https://arxiv.org/abs/2210.02747}{Lipman Y., et al. Flow Matching for Generative Modeling, 2022}
+	\[
+		\bbE_{\pd(\bx(0))} \bbE_{t \sim U[0, 1]} \bbE_{q(\bx(t) | \bx(0))}\bigl\| \bs_{\btheta}(\bx(t), t) - {\color{teal}\nabla_{\bx(t)} \log q(\bx(t) | \bx(0))} \bigr\|^2_2 
+	\]
+	\vspace{-0.3cm}
+	\[
+		p_t(\bx| \bx_1) = q_{1-t}(\bx| \bx_0=\bx_1)
+	\]
+	\vspace{-0.5cm}
+	\begin{block}{Variance Exploding SDE}
+		\vspace{-0.7cm}
+		\[
+				p_t(\bx | \bx_1) = \cN\left(\bx_1, \sigma^2_{1-t}  \bI\right) \quad \Rightarrow \quad 
+				\bff(\bx, \bx_1, t) = - \frac{\sigma'_{1-t}}{\sigma_{1-t}} (\bx_t - \bx_1)
+		\]
+		\vspace{-0.7cm}
+	\end{block}
+	\begin{block}{Variance Preserving SDE}
+		\vspace{-0.7cm}
+		{\small
+		\[
+			p_t(\bx_t | \bx_1) = \cN\left(\alpha_{1-t}  \bx_1, (1 - \alpha^2_{1-t})  \bI \right)  \, \Rightarrow \, 
+		\bff(\bx_t, \bx_1, t) = \frac{\alpha'_{1-t}}{1 - \alpha^2_{1-t}}\cdot \left(\alpha_{1-t}  \bx_t - \bx_1\right)
+		\]
+		}
+	\end{block}
+	\vspace{-0.5cm}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.5\linewidth]{figs/trajectories}
+	\end{figure}
 \end{frame}
 %=======
-\begin{frame}{Outline}
-	\tableofcontents
-\end{frame}
-%=======
-\section{Discrete Diffusion Models}
-%=======
-\begin{frame}{Discrete or Continuous Diffusion Models?}
-	\textbf{Reminder:} Diffusion models define a forward corruption process and a reverse denoising process.
-	Previously, we studied diffusion models with continuous states $\bx(t) \in \mathbb{R}^m$.
+\begin{frame}{Recap of Previous Lecture}
 	\begin{block}{Continuous state space}
 		\begin{itemize}
 			\item \textbf{Discrete time} $t \in \{0,1,\ldots,T\}$ $\;\Rightarrow\;$ \textbf{DDPM / NCSN}.
 			\item \textbf{Continuous time} $t \in [0,1]$ $\;\Rightarrow\;$ \textbf{Score-based SDE models}.
 		\end{itemize}
 	\end{block}
-	\eqpause
-	Now we turn to diffusion over discrete-value states $\bx(t) \in \{1, \dots, K\}^m$.
 	\begin{block}{Discrete state space}
 		\begin{itemize}
 			\item \textbf{Discrete time} $t \in \{0,1,\ldots,T\}$.
 			\item \textbf{Continuous time} $t \in [0,1]$.
 		\end{itemize}
 	\end{block}
-	Let's discuss why we need discrete diffusion models.
-\end{frame}
-%=======
-\begin{frame}{Why Discrete Diffusion Models?}
-	\myfootnotewithlink{https://aaronlou.com/blog/2024/discrete-diffusion/}{https://aaronlou.com/blog/2024/discrete-diffusion/}
-	While autoregressive (AR) models dominate discrete-data domains (e.g., text or sequences), they have fundamental limitations.
-	\eqpause
-	\begin{block}{Key advantages of discrete diffusion}
+    \begin{block}{Key advantages of discrete diffusion}
 		\begin{itemize}
-			\item \textbf{Parallel generation:} diffusion enables sampling all tokens simultaneously, unlike AR’s strictly left-to-right process. 
-			\eqpause
-			\item \textbf{Flexible infilling:}. diffusion can mask arbitrary parts of a sequence and reconstruct them, rather than generating only from prefix to suffix.
-			\eqpause 
-			\item \textbf{Robustness:} diffusion avoids the "exposure bias" caused by teacher forcing in AR training.
-			\eqpause
-			\item \textbf{Unified framework:} diffusion generalizes naturally to discrete domains that do not suit continuous Gaussian noise.
-		\end{itemize}
+			\item Parallel generation
+			\item Flexible infilling
+			\item Robustness
+			\item Unified framework
+        \end{itemize}
 	\end{block}
 \end{frame}
 %=======
-\begin{frame}{2025 – Big Bang of Discrete Diffusion Models}
-	\myfootnotewithlink{https://arxiv.org/abs/2506.17298}{Khanna S. et al. Mercury: Ultra-fast language models based on diffusion, 2025.}
-	\begin{figure}
-		\includegraphics[width=\linewidth]{figs/mercury}
-	\end{figure}
-\end{frame}
-\subsection{Forward Discrete Process}
-%=======
-\begin{frame}{Forward Discrete Process}
+\begin{frame}{Recap of Previous Lecture}
 	\myfootnotewithlink{https://arxiv.org/abs/2107.03006}{Austin J. et al. Structured denoising diffusion models in discrete state-spaces, 2021.}
-	\begin{block}{Continuous Diffusion Markov Chain}
-		In continuous diffusion, the forward Markov chain is defined by progressively corrupting data with Gaussian noise:
-		\[
-			q(\bx_t|\bx_{t-1}) = \mathcal{N}(\sqrt{1-\beta_t}\bx_{t-1}, \beta_t \bI).
-		\]
-	\end{block}
-	\eqpause
-	\vspace{-0.3cm}
 	\begin{block}{Discrete Diffusion Markov Chain}
-		For discrete data, we instead define a Markov chain over categorical states:
 		\[
 			q(\bx_t|\bx_{t-1}) = \Cat(\bQ_t\bx_{t-1}),
 		\]
-		where each $\bx_t \in \{0,1\}^K$ is a \textbf{one-hot vector} encoding the categorical state.
+        Each $\bx_t \in \{0,1\}^K$ is a \textbf{one-hot vector} encoding the categorical state (it is just one token).
 	\end{block}
-	\eqpause
-	What is the transition matrix $\bQ_t$?
-\end{frame}
-%=======
-\begin{frame}{Forward Process over Time}
-	\begin{block}{Transition Matrix}
-		$\bQ_t \in [0,1]^{K \times K}$ is a \textbf{transition matrix} where each column gives transition probabilities from one state to all others, and columns sum to 1:
+    \begin{block}{Transition Matrix}
 		\vspace{-0.5cm}
 		\[
 			[\bQ_t]_{ij} = q(x_t = i | x_{t-1} = j),
 			\qquad
 			\sum_{i=1}^K [\bQ_t]_{ij} = 1.
 		\]
+        \[
+            q(\bx_t|\bx_0) = \Cat(\bQ_{1:t}\bx_0),
+            \qquad
+            \bQ_{1:t} = \bQ_t \bQ_{t-1}\cdots\bQ_1.
+        \]
 		\vspace{-0.5cm}
 	\end{block}
-	\eqpause
-	\begin{itemize}
-		\item The forward diffusion gradually destroys information through repeated random transitions.
-		\eqpause
-		\item Applying the transition $t$ times yields the marginal distribution:
-			\[
-				q(\bx_t|\bx_0) = \Cat(\bQ_{1:t}\bx_0),
-				\qquad
-				\bQ_{1:t} = \bQ_t \bQ_{t-1}\cdots\bQ_1.
-			\]
-		\eqpause
-		\vspace{-0.7cm}
-		\item As $t \to T$, the process drives the data toward a stationary distribution.
-		\eqpause
-		\item We design the transition matrices $\bQ_t$ to achieve this behavior.
-	\end{itemize}
-\end{frame}
-%=======
-\begin{frame}{Transition Matrix}
-	\myfootnotewithlink{https://arxiv.org/abs/2107.03006}{Austin J. et al. Structured denoising diffusion models in discrete state-spaces, 2021.}
-
-	\begin{itemize}
+    \begin{itemize}
 		\item The choice of $\bQ_t$ determines how information is erased and what the stationary distribution becomes.
-		\eqpause
 		\item $\bQ_t$ and $\bQ_{1:t}$ should be easy to compute for each $t$.
-		\item \textbf{Uniform diffusion}
-		\[
-			\bQ_t = (1 - \beta_t) \bI + \beta_t \bU,
-			\qquad
-			\mathbf{U}_{ij} = \tfrac{1}{K}.
-		\]
-		Each token is replaced by a uniformly random symbol with probability $\beta_t$.
-		The stationary distribution is uniform noise.
-		\eqpause
-		\item \textbf{Absorbing diffusion}
-		\[
-			\bQ_t = (1-\beta_t)\bI + \beta_t\, \mathbf{e}_m \mathbf{1}^\top.
-		\]
-		Tokens are gradually replaced by a special mask $m$;
-		the stationary distribution is fully masked.
 	\end{itemize}
-
 \end{frame}
 %=======
-\begin{frame}{Transition Matrix}
-	\[
-		q(\bx_t|\bx_0) = \Cat(\bQ_{1:t}\bx_0),
-		\qquad
-		\bQ_{1:t} = \bQ_t \bQ_{t-1} \cdots \bQ_1.
-	\]
-	\eqpause
-	\begin{block}{Uniform Diffusion}
-		\[
-			\bQ_t = (1-\beta_t)\bI + \beta_t \mathbf{U},
-			\qquad
-			\mathbf{U}_{ij} = \tfrac{1}{K}.
-		\]
-		\[
-			\bQ_{1:t} = \bar\alpha_t\bI + (1 - \bar\alpha_t) \mathbf{U},
-			\quad
-			\bar\alpha_t = \prod_{s=1}^t (1-\beta_s).
-		\]
-		\eqpause
-		\begin{itemize}
-			\item Each token retains its original value with prob.~$\bar\alpha_t$.
-			\item It becomes uniformly random with prob.~$(1 - \bar\alpha_t)$.
-			\item As $t \to T$, the process converges to the stationary uniform distribution.
-		\end{itemize}
-	\end{block}
-\end{frame}
-%=======
-\begin{frame}{Transition Matrix}
+\begin{frame}{Recap of Previous Lecture}
 	\myfootnotewithlink{https://arxiv.org/abs/2107.03006}{Austin J. et al., Structured denoising diffusion models in discrete state-spaces, 2021.}
-
-	\begin{block}{Absorbing Diffusion}
-		\[
-			\bQ_t = (1-\beta_t)\bI + \beta_t\, \mathbf{e}_m \mathbf{1}^\top,
-		\]
-		\[
-			\bQ_{1:t} = \bar\alpha_t\,\bI + (1-\bar\alpha_t)\,\mathbf{e}_m \mathbf{1}^\top,
-			\qquad
-			\bar\alpha_t = \prod_{s=1}^t (1-\beta_s).
-		\]
-		\eqpause
-		\begin{itemize}
-			\item Each token retains its original value with prob.~$\bar\alpha_t$.
-			\item It becomes $\mathbf{e}_m$ with prob.~$(1 - \bar\alpha_t)$.
-			\item As $t \to T$, all tokens converge to the mask state: $q(\bx_T) \approx \Cat(\mathbf{e}_m)$.
-			\item This makes the process analogous to \textbf{masked language modeling}.
-		\end{itemize}
-	\end{block}
-\end{frame}
-%=======
-\begin{frame}{Uniform vs. Absorbing Transition Matrix}
-	\myfootnotewithlink{https://arxiv.org/abs/2107.03006}{Austin J. et al., Structured denoising diffusion models in discrete state-spaces, 2021.}
-	\begin{table}[h!]
-		\centering
-		\small
-		\begin{tabular}{lcc}
-			\toprule
-			\textbf{Aspect} & \textbf{Uniform Diffusion} & \textbf{Absorbing Diffusion} \\
-			\midrule
-			$\bQ_t$
-				& $(1-\beta_t)\bI + \beta_t \mathbf{U}$ 
-				& $(1-\beta_t)\bI + \beta_t \mathbf{e}_m\mathbf{1}^\top$ \\[4pt]
-			$\bQ_{1:t}$
-				& $\bar\alpha_t \bI + (1-\bar\alpha_t)\mathbf{U}$
-				& $\bar\alpha_t \bI + (1-\bar\alpha_t)\mathbf{e}_m\mathbf{1}^\top$ \\[4pt]
-			$\bQ_{1:\infty}$
-				& $\mathbf{U}$
-				& $\Cat(\mathbf{e}_m)$ \\[4pt]
-			Interpretation
-				& Random replacement
-				& Gradual masking of tokens \\[4pt]
-			Application
-				& Image / symbol diffusion
-				& Text diffusion $\approx$ Masked LM \\[4pt]
-			\bottomrule
-		\end{tabular}
-	\end{table}
-	\eqpause
+	\begin{block}{Uniform vs. Absorbing Transition Matrix}
+        \begin{table}[h!]
+            \centering
+            \small
+            \begin{tabular}{lcc}
+                \toprule
+                \textbf{Aspect} & \textbf{Uniform Diffusion} & \textbf{Absorbing Diffusion} \\
+                \midrule
+                $\bQ_t$
+                    & $(1-\beta_t)\bI + \beta_t \mathbf{U}$ 
+                    & $(1-\beta_t)\bI + \beta_t \mathbf{e}_m\mathbf{1}^\top$ \\[4pt]
+                $\bQ_{1:t}$
+                    & $\bar\alpha_t \bI + (1-\bar\alpha_t)\mathbf{U}$
+                    & $\bar\alpha_t \bI + (1-\bar\alpha_t)\mathbf{e}_m\mathbf{1}^\top$ \\[4pt]
+                $\bQ_{1:\infty}$
+                    & $\mathbf{U}$
+                    & $\Cat(\mathbf{e}_m)$ \\[4pt]
+                Interpretation
+                    & Random replacement
+                    & Gradual masking of tokens \\[4pt]
+                Application
+                    & Image diffusion
+                    & Text diffusion $\approx$ Masked LM \\[4pt]
+                \bottomrule
+            \end{tabular}
+        \end{table}
+    \end{block}
 	\begin{block}{Observation}
 		Both schemes gradually destroy information, but differ in their stationary limit.
 		Absorbing diffusion bridges diffusion and masked-language-model objectives.
 	\end{block}
 \end{frame}
 %=======
+\begin{frame}{Recap of Previous Lecture}
+	\myfootnotewithlink{https://arxiv.org/abs/2107.03006}{Austin J. et al., Structured denoising diffusion models in discrete state-spaces, 2021.}
+	\begin{block}{ELBO}
+		\vspace{-0.7cm}
+		\begin{multline*}
+            \cL_{\bphi, \btheta}(\bx) =  {\color{olive}\bbE_{q(\bx_1 | \bx_0)} \log \pt(\bx_0 | \bx_1)} - {\color{violet}\KL\bigl(q(\bx_T | \bx_0) \| p(\bx_T)\bigr)} - \\
+            - {\color{teal}\sum_{t=2}^\top \underbrace{ \bbE_{q(\bx_t | \bx_0)} \KL \bigl(q(\bx_{t-1} | \bx_t, \bx_0) \| \pt(\bx_{t-1} | \bx_t)\bigr)}_{\cL_t}}
+        \end{multline*}
+		\vspace{-0.7cm}
+	\end{block}
+	\begin{block}{Discrete conditioned reverse distribution}
+		\[
+			q(\bx_{t-1} | \bx_t, \bx_0)
+			= \Cat\left(\frac{\bQ_t \bx_t \odot \bQ_{1:t-1} \bx_0}{\bx_t^{\top}\bQ_{1:t}\bx_0}\right).
+		\]
+		\vspace{-0.3cm}
+	\end{block}
+	\begin{itemize}
+		\item Both $q(\bx_{t-1} | \bx_t, \bx_0)$ and $q(\bx_t | \bx_0)$ are known analytically from the forward process.
+		\item The reverse process $\pt(\bx_{t-1} | \bx_t)$ is a learned categorical distribution:
+		\vspace{-0.3cm}
+        \[
+			\pt(\bx_{t-1} | \bx_t) = \Cat\bigl( \bpi_{\btheta}(\bx_t, t) \bigr).
+		\]
+	\end{itemize}
+\end{frame}
+%=======
+\begin{frame}{Recap of Previous Lecture}
+	\myfootnotewithlink{https://arxiv.org/abs/2107.03006}{Austin J. et al., Structured denoising diffusion models in discrete state-spaces, 2021.}
+
+	\begin{block}{ELBO term}
+		\vspace{-0.3cm}
+		\[
+			\cL_t
+			= \bbE_{q(\bx_t | \bx_0)}
+			\KL\bigl(q(\bx_{t-1} | \bx_t, \bx_0) \,\|\, \pt(\bx_{t-1} | \bx_t)\bigr).
+		\]
+		\vspace{-0.3cm}
+	\end{block}
+	\begin{block}{Categorical KL}
+		\vspace{-0.3cm}
+		\[
+			\KL\bigl(\Cat(\bq) \,\|\, \Cat(\bp)\bigr)
+			= \sum_{k=1}^K q_k \log \frac{q_k}{p_k}
+			= \Ent(\bq,\bp) - \Ent(\bq),
+		\]
+		\begin{itemize}
+			\item $\Ent\bigl(q(\bx_{t-1} | \bx_t, \bx_0)\bigr)$ is a constant w.r.t.~$\btheta$.
+			\item $\Ent(\bq,\bp) = -\sum_k q_k \log p_k$ is a \textbf{cross-entropy loss}.
+		\end{itemize}
+	\end{block}
+	Therefore, minimizing $\cL_t$ w.r.t.~$\btheta$ is equivalent to minimizing
+	\[
+		\bbE_{q(\bx_t | \bx_0)}
+		\Ent\Bigl(q(\bx_{t-1} | \bx_t, \bx_0),\, \pt(\bx_{t-1} | \bx_t)\Bigr).
+	\]
+\end{frame}
+%=======
+\begin{frame}{Outline}
+	\tableofcontents
+\end{frame}
+%=======
+\section{Discrete Diffusion}
+%=======
+\subsection{From Token To Sequence}
+%=======
+\begin{frame}{From Token To Sequence}
+    \begin{block}{One-hot sequence representation}
+        \vspace{-0.3cm}
+        \[
+            \bx_t \in \{0,1\}^K
+            \quad\Leftrightarrow\quad
+            \bX_t \in \{0,1\}^{K \times m}
+        \]
+        \vspace{-0.2cm}
+		Here $\bX_t$ is a one-hot representation for sequence of tokens.
+    \end{block}
+	\eqpause
+    \begin{block}{Independent Token-wise Forward Process}
+        \vspace{-0.3cm}
+        \[
+            q(\bX_t |\bX_{t-1}) =
+            \prod_{i=1}^m q(\bx_t^i |\bx_{t-1}^i) = \Cat(\bQ_t \bX_{t-1}).
+        \]
+        \vspace{-0.3cm}
+        \begin{itemize}
+            \item Each position $i$ runs its own Markov chain.
+            \item Often the same transition matrix $\bQ_t$ is shared across~$i$.
+        \end{itemize}
+    \end{block}
+	\eqpause
+    \begin{block}{Continuous Diffusion Analogy}
+        \begin{itemize}
+            \item Gaussian DDPM with diagonal covariance: noise is independent per pixel.
+            \item Structure is not in the noise -- it is learned by the reverse model.
+        \end{itemize}
+    \end{block}
+\end{frame}
+%=======
+\begin{frame}{From Token To Sequence}
+	\[
+		q(\bX_t |\bX_{t-1}) =
+		\prod_{i=1}^m q(\bx_t^i |\bx_{t-1}^i) = \Cat(\bQ_t \bX_{t-1}).
+	\]
+	\eqpause
+	\[
+		q(\bX_t |\bX_{t-1}) = \Cat(\bQ_{1:t} \bX_0).
+	\]
+	\vspace{-0.3cm}
+	\eqpause
+    \begin{block}{Conditioned Reverse Distribution}
+		\[
+			q(\bx_{t-1} | \bx_t, \bx_0)
+			= \Cat\left(\frac{\bQ_t \bx_t \odot \bQ_{1:t-1} \bx_0}{\bx_t^{\top}\bQ_{1:t}\bx_0}\right).
+		\]
+        \vspace{-0.3cm}
+        \[
+            q(\bX_{t-1} | \bX_t, \bX_0) =
+            \prod_{i=1}^m q(\bx_{t-1}^i |\bx_t^i, \bx_0^i).
+        \]
+        \vspace{-0.3cm}
+    \end{block}
+	\eqpause
+    \begin{itemize}
+		\item Every distribution based on forward process is factorized. 
+		\item The dependence appear in the reverse process
+	\end{itemize}
+\end{frame}
+\begin{frame}{Reverse Model For Sequence}
+	\[
+		p_\theta(\bX_{t-1}|\bX_t) =
+		\prod_{i=1}^m p_\theta(\bx_{t-1}^i | {\color{violet}\bX_t}).
+	\]
+	\vspace{-0.3cm}
+	\begin{itemize}
+		\item Output factorizes (parallel prediction across positions).
+		\item But each factor conditions on the entire noisy sequence ${\color{violet}\bx_t}$.
+		\item This is exactly the \textbf{masked language modeling} pattern.
+	\end{itemize}
+	\eqpause
+	\begin{block}{Objective: $\cL_t$ term}
+		\vspace{-0.7cm}
+		\begin{multline*}
+			\KL\left(q(\bX_{t-1}| \bX_t, \bX_0)\,\|\,p_\theta(\bX_{t-1}| \bX_t)\right) \\
+			= \sum_{i=1}^m \KL\left(q(\bx_{t-1}^i|\bx_t^i, \bx_0^i) || \pt(\bx_{t-1}^i|\bx_t)\right).
+		\end{multline*}
+		\vspace{-0.5cm}
+	\end{block}
+	\eqpause
+	\begin{block}{Final objective: masked LM}
+		\vspace{-0.3cm}
+        \[
+            \cL =
+            \sum_{t=1}^T \sum_{i=1}^m
+            \bbE_{q(\bX_t|\bX_0)}
+            \Big[-\log \pt(\bx_0^i |\bX_t)\Big].
+        \]
+	\end{block}
+\end{frame}
+%=======
+\subsection{Absorbing Diffusion}
+%=======
+\begin{frame}{Absorbing Diffusion: Forward Process}
+    \myfootnotewithlink{https://arxiv.org/abs/2406.07524}{Sahoo S. et al. Simple and Effective Masked Diffusion Language Models, 2024}
+	Let's restrict to the case of absorbing transition matrix.
+	At each step $t$:
+	\begin{itemize}
+		\item with probability $(1-\beta_t)$ a token is kept;
+		\item with probability $\beta_t$ it is replaced by the mask token $m$.
+	\end{itemize}
+    \vspace{-0.5cm}
+	\begin{align*}
+		\bQ_t &= (1-\beta_t)\bI + \beta_t\, \mathbf{e}_m \mathbf{1}^\top,
+		\qquad
+		\bar\alpha_t = \prod_{s=1}^t (1-\beta_s). \\
+		\bQ_{1:t} &= \bar\alpha_t\,\bI + (1-\bar\alpha_t)\,\mathbf{e}_m \mathbf{1}^\top.
+	\end{align*}
+	Each position is either still clean or already masked:
+    \vspace{-0.3cm}
+	\[
+		q(\bx_t | \bx_0) = 
+		\begin{cases}
+		\bar\alpha_t, &\bx_t = \bx_0\\
+		1 - \bar\alpha_t, &\bx_t = \mathbf{e}_m \\
+		0, &\text{otherwise}.
+		\end{cases}
+	\]
+\end{frame}
+%=======
 \begin{frame}
 	NOT READY
 \end{frame}
 %=======
-\begin{frame}{Reverse Process and Model Parameterization}
-	\myfootnotewithlink{https://arxiv.org/abs/2107.03006}{Austin J. et al., 2021.}
+\begin{frame}{Absorbing / Masked Diffusion: Sequence View}
+    \myfootnotewithlink{https://arxiv.org/abs/2107.03006}{Austin J. et al., Structured denoising diffusion models in discrete state-spaces, 2021.}
 
-	\begin{block}{Goal}
-		Learn a reverse model that reconstructs cleaner data from corrupted inputs:
-		\[
-			p_\theta(\bx_{t-1}|\bx_t)
-			\approx q(\bx_{t-1}|\bx_t,\bx_0).
-		\]
-	\end{block}
-	\begin{itemize}
-		\item The reverse chain defines the generative process:
-		\[
-			p_\theta(\bx_{0:T}) = p(\bx_T)
-			\prod_{t=1}^{T} p_\theta(\bx_{t-1}|\bx_t).
-		\]
-		\item We parameterize $p_\theta(\bx_{t-1}|\bx_t)$ as a factorized categorical distribution:
-		\[
-			p_\theta(x_{t-1,i}|x_t)
-			= \Cat(x_{t-1,i};\,\pi_\theta(x_t,i,t)),
-		\]
-		where $\pi_\theta$ are model logits over $K$ symbols.
-	\end{itemize}
+    Consider a sequence $\bx_0 = (x_0^1,\dots,x_0^L)$.
+
+    \begin{block}{Independent masking across positions}
+        Because the forward chain factorizes over positions,
+        \[
+            q(\bx_t |\bx_0) = \prod_{\ell=1}^L q(x_t^\ell |x_0^\ell),
+        \]
+        and for each position $\ell$:
+        \[
+            q(x_t^\ell = x_0^\ell |\bx_0) = \bar\alpha_t,
+            \qquad
+            q(x_t^\ell = m |\bx_0) = 1 - \bar\alpha_t.
+        \]
+    \end{block}
+
+    \begin{itemize}
+        \item At small $t$, most tokens remain clean; a few are masked.
+        \item As $t \to T$, almost all tokens become $m$ and $q(\bx_T)$ is concentrated on the fully masked sequence.
+        \item This gives a \textbf{multi-step masking schedule}, instead of BERT’s single-step masking.
+    \end{itemize}
 \end{frame}
 %=======
-\begin{frame}{Variational Objective (Discrete ELBO)}
-	\myfootnotewithlink{https://arxiv.org/abs/2107.03006}{Austin J. et al., 2021.}
-	\begin{block}{Evidence Lower Bound}
-		\[
-		\log p_\theta(\bx_0)
-		\ge
-		\mathbb{E}_q\!\Big[
-			\sum_{t=1}^T
-			-D_{\mathrm{KL}}\big(
-				q(\bx_{t-1}|\bx_t,\bx_0)
-				\;\|\;
-				p_\theta(\bx_{t-1}|\bx_t)
-			)
-		\Big].
-		\]
+\begin{frame}{Posterior in Absorbing Diffusion: Unmask vs Stay Masked}
+    \myfootnotewithlink{https://arxiv.org/abs/2107.03006}{Austin J. et al., Structured denoising diffusion models in discrete state-spaces, 2021.}
+
+    Recall the general discrete posterior
+    \[
+        q(x_{t-1} |x_t, x_0)
+        = \frac{q(x_t |x_{t-1})\, q(x_{t-1} |x_0)}
+               {q(x_t |x_0)}.
+    \]
+    For the absorbing process we can obtain a closed-form expression.
+    \begin{block}{Case 1: $x_t = x_0$ (token not yet masked)}
+        Because the mask is absorbing, we cannot go from mask back to a clean token:
+        \[
+            q(x_{t-1} = x_0 |x_t = x_0, x_0) = 1.
+        \]
+        If we observe $x_t = x_0$, we know the token has \textbf{never been masked} up to time $t$.
+    \end{block}
+\end{frame}
+%=======
+\begin{frame}{Posterior in Absorbing Diffusion: Unmask vs Stay Masked}
+    \begin{block}{Case 2: $x_t = m$ (token is masked)}
+        Now $x_{t-1}$ could be:
+        \begin{itemize}
+            \item already masked at $t-1$ and stayed masked, or
+            \item still clean ($x_0$) at $t-1$ and masked only at step $t$.
+        \end{itemize}
+        Using the forward marginals,
+        \[
+            q(x_{t-1} = x_0 |x_t = m, x_0)
+            = \frac{\bar\alpha_{t-1}\,\beta_t}{1-\bar\alpha_t},
+        \]
+        \[
+            q(x_{t-1} = m |x_t = m, x_0)
+            = \frac{1-\bar\alpha_{t-1}}{1-\bar\alpha_t},
+        \]
+        and all other states have probability $0$.
+    \end{block}
+\end{frame}
+%=======
+\begin{frame}{Posterior in Absorbing Diffusion: Interpretation}
+    \begin{block}{Unmask vs stay masked}
+        When $x_t = m$,
+        \[
+            q(x_{t-1} |x_t = m, x_0)
+            = \underbrace{\frac{1-\bar\alpha_{t-1}}{1-\bar\alpha_t}}_{\text{already masked}}
+                \delta_{x_{t-1}=m}
+            + \underbrace{\frac{\bar\alpha_{t-1}\beta_t}{1-\bar\alpha_t}}_{\text{just masked}}
+                \delta_{x_{t-1}=x_0}.
+        \]
+    \end{block}
+
+    \begin{itemize}
+        \item The posterior is a simple binary choice:
+        \begin{itemize}
+            \item \textbf{stay masked}: keep $x_{t-1} = m$,
+            \item \textbf{unmask}: revert to the original symbol $x_0$.
+        \end{itemize}
+        \item The reverse model $\pt(x_{t-1} |x_t)$ learns, at masked positions,
+        how likely it is to \emph{unmask} vs \emph{stay masked}.
+        \item This is exactly the semantic of \textbf{iterative infilling}:
+        tokens start from mask and are gradually turned into meaningful symbols.
+    \end{itemize}
+\end{frame}
+%=======
+\begin{frame}{ELBO Term for Absorbing Diffusion}
+    \myfootnotewithlink{https://arxiv.org/abs/2107.03006}{Austin J. et al., Structured denoising diffusion models in discrete state-spaces, 2021.}
+
+    Recall the per-timestep ELBO term
+    \[
+        \cL_t
+        = \bbE_{q(\bx_t |\bx_0)}
+        \KL\bigl(q(\bx_{t-1} |\bx_t, \bx_0)
+        \,\|\, \pt(\bx_{t-1} |\bx_t)\bigr).
+    \]
+
+    \begin{block}{Categorical KL $\Rightarrow$ cross-entropy}
+        As before,
+        \[
+            \KL\bigl(\Cat(\bq)\,\|\,\Cat(\bp)\bigr)
+            = \Ent(\bq,\bp) - \Ent(\bq),
+        \]
+        and the entropy term $\Ent(\bq)$ does not depend on $\btheta$.
+
+        Therefore minimizing $\cL_t$ is equivalent (w.r.t.~$\btheta$) to
+        \[
+            \bbE_{q(\bx_t |\bx_0)}
+            \Ent\Bigl(q(\bx_{t-1} |\bx_t, \bx_0),
+                     \pt(\bx_{t-1} |\bx_t)\Bigr).
+        \]
+    \end{block}
+
+    \begin{itemize}
+        \item For absorbing diffusion, $q(x_{t-1}^\ell |x_t^\ell, x_0^\ell)$
+              is supported only on $\{x_0^\ell, m\}$.
+        \item This makes the target distribution extremely simple, and opens the door
+              to a much simpler training loss.
+    \end{itemize}
+\end{frame}
+%=======
+\begin{frame}{Simplified Training: Predict Clean Token at Masked Positions}
+    \myfootnotewithlink{https://arxiv.org/abs/2107.03006}{Austin J. et al., Structured denoising diffusion models in discrete state-spaces, 2021.}
+    \myfootnotewithlink{https://arxiv.org/pdf/2406.07524.pdf}{See also recent refinements in arXiv:2406.07524.}
+
+    \begin{block}{Key observation}
+        For absorbing diffusion:
+        \begin{itemize}
+            \item If $x_t^\ell \neq m$, then $x_t^\ell = x_0^\ell$ and the posterior
+                  $q(x_{t-1}^\ell |x_t^\ell, x_0^\ell)$ is a delta at $x_0^\ell$.
+            \item If $x_t^\ell = m$, the posterior is a binary distribution over $\{m, x_0^\ell\}$.
+        \end{itemize}
+        The informative supervision is concentrated at \textbf{masked positions}.
+    \end{block}
+\end{frame}
+%=======
+\begin{frame}{Simplified Training: Predict Clean Token at Masked Positions}
+    \begin{block}{Practical training objective}
+        In practice we parameterize the model to predict $x_0$ from $(\bx_t, t)$:
+        \[
+            \pt(x_0^\ell |\bx_t, t) = \Cat\bigl(\bpi_\theta(\bx_t, t)^\ell\bigr),
+        \]
+        and minimize a time-conditioned cross-entropy:
+        \[
+            \cL_{\text{mask}}(\theta)
+            = \bbE_{t,\,\bx_0,\,\bx_t \sim q(\bx_t |\bx_0)}
+              \sum_{\ell=1}^L w_t \,
+              \mathbb{I}\{x_t^\ell = m\}
+              \bigl[-\log \pt(x_0^\ell |\bx_t, t)\bigr].
+        \]
+        \begin{itemize}
+            \item $w_t$ – optional weighting over timesteps (e.g., uniform over $t$).
+            \item We apply cross-entropy only at positions where the input token is masked.
+        \end{itemize}
+    \end{block}
+\end{frame}
+%=======
+\begin{frame}{Absorbing Diffusion as Multi-step Masked LM}
+    \begin{itemize}
+        \item Forward process: gradually replace tokens by a mask $m$
+              according to a diffusion schedule $\{\beta_t\}$.
+        \item Reverse process: starting from an all-mask sequence,
+              iteratively \textbf{unmask} positions by predicting clean tokens $x_0$
+              from $(\bx_t, t)$.
+        \item Training: time-conditioned masked language modeling objective
+              on masked positions:
+              \[
+                  (\bx_0, t) \;\mapsto\; \bx_t \sim q(\bx_t |\bx_0),
+                  \quad
+                  \text{predict } x_0^\ell \text{ wherever } x_t^\ell = m.
+              \]
+        \item This perspective makes absorbing diffusion feel very close to BERT-style
+              masked LMs, but with:
+              \begin{itemize}
+                  \item a \textbf{multi-step} corruption schedule,
+                  \item explicit modeling of the full reverse Markov chain.
+              \end{itemize}
+    \end{itemize}
+\end{frame}
+%=======
+\section{Latent Space Models}
+%=======
+\subsection{Score-Based Models}
+%=======
+\begin{frame}{Latent Space Models}
+    \myfootnote{\href{https://arxiv.org/abs/2307.08698}{Dao Q. et al. Flow Matching in Latent Space, 2023} \\ \href{https://neurips2023-ldm-tutorial.github.io/}{NeurIPS 2023 Tutorial: Latent Diffusion Models: Is the Generative AI Revolution Happening in Latent Space?}}
+		\vspace{-0.3cm}
+	\begin{block}{Score-Based Models (Diffusion)}
+		\vspace{-0.3cm}
+		\begin{figure}
+			\includegraphics[width=\linewidth]{figs/latent_diffusion}
+		\end{figure}
+		\vspace{-0.3cm}
 	\end{block}
-	For categorical transitions, the KL becomes a cross-entropy term:
+    \eqpause
+	\begin{block}{Flow Matching}
+		\vspace{-0.3cm}
+		\begin{figure}
+			\includegraphics[width=\linewidth]{figs/latent_flow_matching}
+		\end{figure}
+	\end{block}
+\end{frame}
+%=======
+\subsection{Autoregressive Models}
+%=======
+\begin{frame}{Vector Quantized VAE (VQ-VAE)}
+    \myfootnote{\href{https://arxiv.org/abs/2004.02088}{Zhao Y. et al. Feature Quantization Improves GAN Training, 2020} \\ \href{https://arxiv.org/abs/1711.00937}{Oord A., Vinyals O., Kavukcuoglu K. Neural Discrete Representation Learning, 2017}}
+
+	Define a dictionary space $\{\be_k\}_{k=1}^K$, where $\be_k \in \bbR^C$ and $K$ is the dictionary’s size.
+	\vspace{-0.5cm}
+	\begin{minipage}[t]{0.45\columnwidth}
+		\[
+			\bz_q = \bq (\bz) = \be_{k^*}
+		\]
+        Here $k^* = \argmin_k \| \bz - \be_k \|$.
+	\end{minipage}%
+	\begin{minipage}[t]{0.55\columnwidth}
+		\vspace{-0.5cm}
+		\begin{figure}
+			\includegraphics[width=\linewidth]{figs/fqgan_cnn}
+		\end{figure}
+	\end{minipage}	
+	\vspace{0.5cm}	
+    \eqpause
 	\[
-		\mathcal{L}_t
-		= \mathbb{E}_{\bx_0,t}
-		[-\log p_\theta(x_{t-1}\!=\!x_0\,|\,\bx_t,t)].
+		\cL_{\bphi, \btheta}(\bx)  =  \log \pt(\bx| \bz_q) - \log K
 	\]
-	\begin{itemize}
-		\item Equivalent to predicting the clean token $x_0$ from a partially noised $\bx_t$.
-		\item In practice, the model learns to *denoise* corrupted inputs at multiple noise levels.
-	\end{itemize}
+	\vspace{-0.3cm}
+	\begin{figure}
+		\centering
+		\includegraphics[width=\linewidth]{figs/vqvae}
+	\end{figure}
 \end{frame}
 %=======
-\begin{frame}{Relation to Masked Language Modeling (MLM)}
-	\myfootnotewithlink{https://arxiv.org/abs/2107.03006}{Austin J. et al., 2021.}
+\begin{frame}{Vector Quantized GAN}
+    \myfootnotewithlink{https://arxiv.org/abs/2012.09841}{Esser P. et al. Taming Transformers for High-Resolution Image Synthesis, 2020}
 	\begin{itemize}
-		\item In absorbing diffusion, corrupted tokens are replaced by a mask $m$.
-		\item The denoising task becomes identical to predicting masked tokens:
-			\[
-				\mathcal{L}
-				= \mathbb{E}_{t\sim p(t)}
-				\mathbb{E}_{\bx_t\sim q(\bx_t|\bx_0)}
-				[-\log p_\theta(\bx_0|\bx_t,t)].
-			\]
-		\item Therefore, discrete diffusion can be seen as a \textbf{mixture of MLM objectives}
-			with varying masking rates.
-		\item This view directly connects diffusion LMs to BERT-style training,
-			but provides a principled probabilistic framework.
+		\item We use a VQ-VAE model and its objective.
+		\item We add an adversarial loss between generated and real images to further improve the visual quality of reconstructions.
 	\end{itemize}
+	\begin{figure}
+		\includegraphics[width=\linewidth]{figs/vqgan}
+	\end{figure}
 \end{frame}
 %=======
-%=======
-\begin{frame}{Posterior Distribution $q(x_{t-1} \mid x_t, x_0)$}
-	\myfootnotewithlink{https://arxiv.org/pdf/2107.03006}{Austin J. et al., \textit{Structured denoising diffusion models in discrete state-spaces}, 2021.}
+\begin{frame}{LlamaGen: Pure Autoregression}
+    \myfootnotewithlink{https://arxiv.org/abs/2406.06525}{Sun P. et al. Autoregressive Model Beats Diffusion: Llama for Scalable Image Generation, 2024}
 	\begin{itemize}
-		\item To train the reverse model, we need the posterior distribution
-			\[
-				q(x_{t-1} \mid x_t, x_0).
-			\]
-		\item From Bayes’ rule (Eq.~3 in the paper):
-			\[
-				q(x_{t-1} \mid x_t, x_0)
-				= 
-				\frac{
-					q(x_t \mid x_{t-1}) \, q(x_{t-1} \mid x_0)
-				}{
-					q(x_t \mid x_0)
-				}.
-			\]
-		\item All three terms are tractable:
-			\[
-			\begin{aligned}
-				q(x_t \mid x_{t-1}) &= \Cat(Q_t[x_{t-1},:]),\\
-				q(x_{t-1} \mid x_0) &= \Cat(Q_{1:(t-1)}[x_0,:]),\\
-				q(x_t \mid x_0) &= \Cat(Q_{1:t}[x_0,:]).
-			\end{aligned}
-			\]
-		\item This expression defines a categorical distribution over $x_{t-1}$,
-		      enabling exact computation of the discrete ELBO.
+		\item Use a VQ-GAN encoder for mapping images into the discrete latent space (codebook vectors).
+		\item Train a pure autoregressive model (Llama-based) in the latent space.
+		\item Use the VQ-GAN decoder to map discrete tokens back to image space.
 	\end{itemize}
+	\vspace{-0.3cm}
+	\begin{figure}
+		\includegraphics[width=0.85\linewidth]{figs/llamagen_samples}
+	\end{figure}
 \end{frame}
 %=======
-\begin{frame}{Posterior Distribution $q(x_{t-1} \mid x_t, x_0)$}
-	\myfootnotewithlink{https://arxiv.org/pdf/2107.03006}{Austin J. et al., \textit{Structured Denoising Diffusion Models in Discrete State-Spaces}, 2021.}
-
-	\begin{block}{Exact posterior (Eq.~3 in the paper, TRANSPOSE)}
-		\[
-		q(x_{t-1} \mid x_t, x_0)
-		=
-		\Cat\!\left(
-			x_{t-1};
-			\; \bp =
-			\frac{
-				x_t \bQ_t^{\!\top} \odot x_0 \, \bar{\bQ}_{t-1}
-			}{
-				x_0 \, \bar{\bQ}_t \, x_t^{\!\top}
-			}
-		\right).
-		\]
-	\end{block}
-
-	\eqpause
-	\begin{itemize}
-		\item $\bQ_t$ — forward transition at step $t$.
-		\item $\bar{\bQ}_t = \bQ_t \bQ_{t-1}\!\cdots\bQ_1$ — cumulative transition.
-		\item $\odot$ — elementwise (Hadamard) product.
-	\end{itemize}
+\begin{frame}{Visual Autoregressive Modeling (VAR)}
+    \myfootnotewithlink{https://arxiv.org/abs/2404.02905}{Tean K. et al. Visual Autoregressive Modeling: Scalable Image Generation via Next-Scale Prediction, 2024}
+	\begin{figure}
+		\includegraphics[width=0.9\linewidth]{figs/var_idea}
+	\end{figure}
+    \eqpause
+	\begin{figure}
+		\includegraphics[width=0.9\linewidth]{figs/var_training}
+	\end{figure}
+\end{frame}
+%=======
+\section{The Worst Course Overview}
+%=======
+\begin{frame}{The Worst Course Overview :)}
+    \myfootnotewithlink{https://lilianweng.github.io/posts/2021-07-11-diffusion-models/}{Weng L. What are Diffusion Models?, blog post, 2021}
+	\begin{figure}
+		\includegraphics[width=\linewidth]{figs/generative-overview}
+	\end{figure}
+\end{frame}
+%=======
+\begin{frame}{The Worst Course Overview :)}
+    \myfootnote{\href{https://arxiv.org/abs/2112.07804}{Xiao Z., Kreis K., Vahdat A. Tackling the generative learning trilemma with denoising diffusion GANs, 2021} \\ \href{https://udlbook.github.io/udlbook/}{Simon J.D. Prince. Understanding Deep Learning, 2023}}
+	\vspace{-0.3cm}
+	\begin{figure}
+		\includegraphics[width=0.45\linewidth]{figs/trilemma}
+	\end{figure}
+    \eqpause
+	\vspace{-0.5cm}
+	\begin{figure}
+		\includegraphics[width=0.9\linewidth]{figs/gen_comp_table}
+	\end{figure}
 \end{frame}
 %=======
 \begin{frame}{Summary}
 	\begin{itemize}
-		\item 
+		\item Most state-of-the-art generative models are latent variable models with either continuous or discrete latent spaces.
 	\end{itemize}
 \end{frame}
+%=======
 \end{document}

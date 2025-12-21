@@ -466,13 +466,13 @@
 \begin{frame}{Continuous-Time Normalizing Flows}
     \myfootnotewithlink{https://arxiv.org/abs/1806.07366}{Chen R. T. Q. et al. Neural Ordinary Differential Equations, 2018}   
 
-	Let's return to ODE dynamics $\bx(t)$ in the interval $t \in [0, 1]$:
+	Let's return to ODE dynamics $\bx_t = \bx(t)$ in the interval $t \in [0, 1]$:
 	\begin{itemize}
 		\item $\bx_0 \sim p_0(\bx) = p(\bx)$, $\bx_1 \sim p_1(\bx) =  \pd(\bx)$;
 		\item $p(\bx)$ is a base distribution (e.g., $\cN(0, \bI)$), and $\pd(\bx)$ is the true data distribution.
 	\end{itemize}
 	\[
-		\frac{d \bx}{dt} = \bff (\bx, t),  \quad \text{with initial condition } \bx(0) = \bx_0.
+		\frac{d \bx_t}{dt} = \bff (\bx_t, t),  \quad \text{with initial condition } \bx(0) = \bx_0.
 	\]
     \eqpause
 	\vspace{-0.3cm}
@@ -556,7 +556,7 @@
 	where $\bff(\bx, \bz, t)$ is a \textbf{conditional vector field}:
 	\eqpause
 	\[
-		\frac{d\bx}{dt} = \bff(\bx, t) \quad \Rightarrow \quad \frac{d\bx}{dt} = \bff(\bx, \bz, t)
+		\frac{d\bx_t}{dt} = \bff(\bx_t, t) \quad \Rightarrow \quad \frac{d\bx_t}{dt} = \bff(\bx_t, \bz, t)
 	\]
 	\vspace{-0.3cm}
 	What's the relationship between $\bff(\bx, t)$ and $\bff(\bx, \bz, t)$?
